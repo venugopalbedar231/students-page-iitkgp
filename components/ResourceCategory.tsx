@@ -31,11 +31,16 @@ export default function ResourceCategory({ title, links, defaultOpen = false }: 
       >
         {/* Drop the "(UG)"/"(PG)" parenthetical, but keep multi-word titles intact. */}
         <h3 className="font-lexend font-semibold text-lg m-0">FOR {title.replace(/\s*\([^)]*\)/g, '')}</h3>
-        <i className={`fas fa-chevron-${isOpen ? 'up' : 'down'} transition-transform duration-300`}></i>
+        <i className={`fas fa-chevron-down transition-transform duration-300 motion-reduce:transition-none ${isOpen ? 'rotate-180' : ''}`}></i>
       </div>
 
-      {/* Content */}
-      <div className={`md:block ${isOpen ? 'block' : 'hidden'}`}>
+      {/* Content — animated open/close on mobile via grid-rows 0fr→1fr; untouched on desktop. */}
+      <div
+        className={`max-md:grid max-md:transition-[grid-template-rows] max-md:duration-300 max-md:ease-out motion-reduce:transition-none ${
+          isOpen ? 'max-md:grid-rows-[1fr]' : 'max-md:grid-rows-[0fr]'
+        }`}
+      >
+        <div className="max-md:overflow-hidden max-md:min-h-0">
         <div className="p-4 md:p-5 bg-[#fafafa]">
           {/* Desktop Grid View */}
           <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -71,6 +76,7 @@ export default function ResourceCategory({ title, links, defaultOpen = false }: 
               </a>
             ))}
           </div>
+        </div>
         </div>
       </div>
     </div>

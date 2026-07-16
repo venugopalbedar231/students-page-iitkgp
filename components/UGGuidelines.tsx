@@ -112,6 +112,14 @@ const docs: Doc[] = [
 
 function DocCard({ doc }: { doc: Doc }) {
   const [open, setOpen] = useState(false);
+  // Mount the iframe on first preview and keep it: the animation needs the wrapper to stay in
+  // the DOM to transition, and re-opening shouldn't refetch 24 MB. Nothing loads until asked.
+  const [mounted, setMounted] = useState(false);
+
+  const toggle = () => {
+    setMounted(true);
+    setOpen((v) => !v);
+  };
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
@@ -136,11 +144,15 @@ function DocCard({ doc }: { doc: Doc }) {
             </a>
             {/* The handbook is 24 MB — the preview iframe only mounts once asked for. */}
             <button
-              onClick={() => setOpen((v) => !v)}
+              onClick={toggle}
               aria-expanded={open}
               className="inline-flex items-center justify-center gap-2 max-md:min-h-11 bg-white text-gray-600 border border-gray-200 font-inter font-semibold text-xs px-4 py-2 rounded-full hover:border-[#FF7F00] hover:text-[#FF7F00] transition-colors"
             >
-              <i className={`fas fa-chevron-${open ? 'up' : 'down'} text-[10px]`}></i>
+              <i
+                className={`fas fa-chevron-down text-[10px] transition-transform duration-300 motion-reduce:transition-none ${
+                  open ? 'rotate-180' : ''
+                }`}
+              ></i>
               {open ? 'Hide preview' : 'Preview'}
             </button>
             <a
@@ -156,13 +168,21 @@ function DocCard({ doc }: { doc: Doc }) {
         </div>
       </div>
 
-      {open && (
-        <iframe
-          src={doc.href}
-          title={doc.title}
-          className="w-full h-[60vh] md:h-[75vh] border-0 border-t border-gray-200 bg-gray-50"
-        />
-      )}
+      <div
+        className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none ${
+          open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+        }`}
+      >
+        <div className="overflow-hidden min-h-0">
+          {mounted && (
+            <iframe
+              src={doc.href}
+              title={doc.title}
+              className="w-full h-[60vh] md:h-[75vh] border-0 border-t border-gray-200 bg-gray-50"
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -187,11 +207,16 @@ export default function UGGuidelines() {
         onClick={() => setIsOpen(!isOpen)}
       >
         <h3 className="font-lexend font-semibold text-lg m-0">UG GUIDELINES</h3>
-        <i className={`fas fa-chevron-${isOpen ? 'up' : 'down'} transition-transform duration-300`}></i>
+        <i className={`fas fa-chevron-down transition-transform duration-300 motion-reduce:transition-none ${isOpen ? 'rotate-180' : ''}`}></i>
       </div>
 
-      {/* Content */}
-      <div className={`md:block ${isOpen ? 'block' : 'hidden'}`}>
+      {/* Content — animated open/close on mobile via grid-rows 0fr→1fr; untouched on desktop. */}
+      <div
+        className={`max-md:grid max-md:transition-[grid-template-rows] max-md:duration-300 max-md:ease-out motion-reduce:transition-none ${
+          isOpen ? 'max-md:grid-rows-[1fr]' : 'max-md:grid-rows-[0fr]'
+        }`}
+      >
+        <div className="max-md:overflow-hidden max-md:min-h-0">
         <div className="p-4 md:p-5 bg-[#fafafa] flex flex-col gap-5">
 
           <p className="text-sm text-gray-600 font-inter leading-relaxed m-0 max-w-3xl">
@@ -284,6 +309,7 @@ export default function UGGuidelines() {
             </div>
           </div>
 
+        </div>
         </div>
       </div>
     </div>
