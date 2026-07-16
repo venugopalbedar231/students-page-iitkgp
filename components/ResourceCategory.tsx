@@ -29,7 +29,8 @@ export default function ResourceCategory({ title, links, defaultOpen = false }: 
         className="md:hidden bg-[#FF7F00] text-white px-4 py-3 flex justify-between items-center cursor-pointer select-none"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <h3 className="font-lexend font-semibold text-lg m-0">FOR {title.split(' ')[0]}</h3>
+        {/* Drop the "(UG)"/"(PG)" parenthetical, but keep multi-word titles intact. */}
+        <h3 className="font-lexend font-semibold text-lg m-0">FOR {title.replace(/\s*\([^)]*\)/g, '')}</h3>
         <i className={`fas fa-chevron-${isOpen ? 'up' : 'down'} transition-transform duration-300`}></i>
       </div>
 

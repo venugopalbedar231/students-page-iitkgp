@@ -2,6 +2,10 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import NewsSidebar from "@/components/NewsSidebar";
 import ResourceCategory from "@/components/ResourceCategory";
+import UGGuidelines from "@/components/UGGuidelines";
+import Scholarships from "@/components/Scholarships";
+import EmergencyContacts from "@/components/EmergencyContacts";
+import ExtraCurricular from "@/components/ExtraCurricular";
 import CampusMap from "@/components/CampusMap";
 
 import HeroVideo from "@/components/HeroVideo";
@@ -74,8 +78,16 @@ export default function Home() {
             <div className="w-full md:w-2/3 lg:w-3/4 flex flex-col">
               <ResourceCategory title="Undergraduate (UG)" links={ugLinks} defaultOpen={true} />
               <ResourceCategory title="Postgraduate (PG)" links={pgLinks} defaultOpen={false} />
-              <ResourceCategory title="PhD" links={phdLinks} defaultOpen={false} />
-              
+              <ResourceCategory title="Research Scholars" links={phdLinks} defaultOpen={false} />
+
+              <UGGuidelines />
+
+              <Scholarships />
+
+              <ExtraCurricular />
+
+              <EmergencyContacts />
+
               <CampusMap />
             </div>
 
