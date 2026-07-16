@@ -8,13 +8,15 @@ import React, { useState } from 'react';
  */
 type Contact = { label: string; numbers: string[]; note?: string };
 type Group = { title: string; icon: string; contacts: Contact[] };
-type Office = { role: string; number: string; email?: string; note?: string; placeholder?: boolean };
+type Office = { role: string; numbers: string[]; email?: string; note?: string };
 
 function telHref(raw: string): string {
   const digits = raw.replace(/\D/g, '');
   if (/^\d{3}$/.test(digits)) return `tel:${digits}`;              // national short code
   if (/^\d{5}$/.test(digits)) return `tel:+913222 2${digits}`.replace(/\s/g, ''); // campus extension
   if (/^\d{6}$/.test(digits)) return `tel:+913222${digits}`;        // Kharagpur town
+  if (/^91\d{10}$/.test(digits)) return `tel:+${digits}`;           // mobile, country code already present
+  if (/^\d{10}$/.test(digits)) return `tel:+91${digits}`;           // bare Indian mobile
   return `tel:+91${digits.replace(/^0/, '')}`;                      // number with its own STD code
 }
 
@@ -26,17 +28,31 @@ const emergency: Contact[] = [
 ];
 
 /**
- * DRAFT: the VP and Welfare entries are placeholders — no number was available for them.
- * They render as non-dialable "XXXXX" so a placeholder can never be called by mistake.
+ * The VP and Welfare numbers are personal mobiles of elected TSG officials — they turn over
+ * with each term, so re-check them at the start of every session.
  *
  * Dean, Student Affairs (ext 82038 / deansa@hijli.iitkgp.ac.in) is UNVERIFIED: it comes from
  * a web search of iitkgp.ac.in/deans, whose fetchAllDeans endpoint was returning HTTP 500 and
- * could not be checked against the live directory. Confirm before this leaves draft.
+ * could not be checked against the live directory. Note the Faculty Advisor handbook (2026
+ * Issue-I, booklet p5) gives the DOSA office as ext 82042, which contradicts this.
  */
 const offices: Office[] = [
-  { role: "Vice President, TSG", number: "XXXXX", placeholder: true, note: "Technology Students' Gymkhana" },
-  { role: "Gen. Secretary, Students' Welfare", number: "XXXXX", placeholder: true, note: "TSG students' welfare" },
-  { role: "Dean, Student Affairs", number: "82038", email: "deansa@hijli.iitkgp.ac.in", note: "Institute student affairs office" },
+  {
+    role: "Vice President, TSG",
+    numbers: ["+91 99752 61910"],
+    note: "Technology Students' Gymkhana",
+  },
+  {
+    role: "Gen. Secretary, Students' Welfare",
+    numbers: ["+91 93410 35378", "+91 63052 64348", "+91 96196 13642"],
+    note: "TSG students' welfare",
+  },
+  {
+    role: "Dean, Student Affairs",
+    numbers: ["82038"],
+    email: "deansa@hijli.iitkgp.ac.in",
+    note: "Institute student affairs office",
+  },
 ];
 
 const campusGroups: Group[] = [
@@ -213,54 +229,37 @@ export default function EmergencyContacts() {
               Student support &amp; offices
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {offices.map((o) => {
-                const inner = (
-                  <>
-                    <div className="flex items-center justify-between gap-2 mb-2.5">
-                      <div className="w-8 h-8 rounded-lg bg-[#FFF2E5] text-[#FF7F00] flex items-center justify-center text-sm shrink-0">
-                        <i className="fas fa-user-tie"></i>
-                      </div>
-                      {o.placeholder && (
-                        <span className="text-[9px] font-inter font-bold uppercase tracking-wider text-amber-700 bg-amber-100 border border-amber-300 px-1.5 py-0.5 rounded">
-                          Placeholder
-                        </span>
-                      )}
-                    </div>
-                    <span className="font-lexend font-semibold text-[13px] text-gray-900 leading-snug mb-1.5">
-                      {o.role}
-                    </span>
-                    <span
-                      className={`font-lexend font-bold text-lg tabular-nums leading-none mb-1.5 ${
-                        o.placeholder ? 'text-gray-400' : 'text-[#FF7F00]'
-                      }`}
-                    >
-                      {o.number}
-                    </span>
-                    {o.note && <span className="text-[11px] text-gray-500 font-inter leading-snug">{o.note}</span>}
-                    {o.email && (
-                      <span className="text-[11px] text-gray-500 font-inter leading-snug mt-1 break-all">{o.email}</span>
-                    )}
-                  </>
-                );
-
-                // Placeholders are deliberately not dialable.
-                return o.placeholder ? (
-                  <div
-                    key={o.role}
-                    className="flex flex-col bg-white border border-dashed border-gray-300 rounded-xl p-4"
-                  >
-                    {inner}
+              {offices.map((o) => (
+                <div
+                  key={o.role}
+                  className="flex flex-col bg-white border border-[#FF7F00]/20 rounded-xl p-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:border-[#FF7F00]"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-[#FFF2E5] text-[#FF7F00] flex items-center justify-center text-sm shrink-0 mb-2.5">
+                    <i className="fas fa-user-tie"></i>
                   </div>
-                ) : (
-                  <a
-                    key={o.role}
-                    href={telHref(o.number)}
-                    className="group flex flex-col bg-white border border-[#FF7F00]/20 rounded-xl p-4 no-underline transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:border-[#FF7F00]"
-                  >
-                    {inner}
-                  </a>
-                );
-              })}
+
+                  <span className="font-lexend font-semibold text-[13px] text-gray-900 leading-snug mb-2">
+                    {o.role}
+                  </span>
+
+                  <div className="flex flex-col mb-1.5">
+                    {o.numbers.map((n) => (
+                      <a
+                        key={n}
+                        href={telHref(n)}
+                        className="inline-flex items-center max-md:min-h-11 font-lexend font-bold text-base text-[#FF7F00] hover:text-[#e06f00] tabular-nums leading-tight no-underline transition-colors"
+                      >
+                        {n}
+                      </a>
+                    ))}
+                  </div>
+
+                  {o.note && <span className="text-[11px] text-gray-500 font-inter leading-snug">{o.note}</span>}
+                  {o.email && (
+                    <span className="text-[11px] text-gray-500 font-inter leading-snug mt-1 break-all">{o.email}</span>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 
