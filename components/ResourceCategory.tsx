@@ -21,7 +21,7 @@ export default function ResourceCategory({ title, links, defaultOpen = false }: 
     <div className="mb-6 md:mb-8 rounded-lg shadow-sm border border-gray-200 bg-white overflow-hidden">
       {/* Desktop Header */}
       <div className="hidden md:block bg-[#FF7F00] text-white px-4 py-3">
-        <h3 className="font-lexend font-semibold text-lg m-0">{title}</h3>
+        <h3 className="font-lexend font-semibold text-lg m-0 uppercase">{title}</h3>
       </div>
       
       {/* Mobile Accordion Header */}
@@ -30,7 +30,7 @@ export default function ResourceCategory({ title, links, defaultOpen = false }: 
         onClick={() => setIsOpen(!isOpen)}
       >
         {/* Drop the "(UG)"/"(PG)" parenthetical, but keep multi-word titles intact. */}
-        <h3 className="font-lexend font-semibold text-lg m-0">FOR {title.replace(/\s*\([^)]*\)/g, '')}</h3>
+        <h3 className="font-lexend font-semibold text-lg m-0 uppercase">FOR {title.replace(/\s*\([^)]*\)/g, '')}</h3>
         <i className={`fas fa-chevron-down transition-transform duration-300 motion-reduce:transition-none ${isOpen ? 'rotate-180' : ''}`}></i>
       </div>
 
