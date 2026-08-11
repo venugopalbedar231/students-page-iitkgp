@@ -1,20 +1,12 @@
 "use client";
-import React, { useState } from 'react';
-
-/**
- * Real posts from the Institute and Gymkhana Instagram accounts, newest first. Summaries are
- * condensed from the original captions — see /public/news for the accompanying images.
- *
- * `href` points at the source account, not the individual post: permalinks weren't available
- * when this was written. Swap in the real post URLs when you have them.
- */
+import React, { useState, useEffect } from 'react';
 
 const ACCOUNTS = {
   tsg: { handle: "tsg.iitkharagpur", url: "https://www.instagram.com/tsg.iitkharagpur/" },
   inst: { handle: "iit.kgp", url: "https://www.instagram.com/iit.kgp/" },
 } as const;
 
-type NewsItem = {
+export type NewsItem = {
   id: number;
   title: string;
   date: string;
@@ -23,9 +15,10 @@ type NewsItem = {
   img: string;
   alt: string;
   account: keyof typeof ACCOUNTS;
+  category?: string;
 };
 
-const newsItems: NewsItem[] = [
+const DEFAULT_NEWS: NewsItem[] = [
   {
     id: 1,
     title: "Nasha Mukt Bharat pledge at LBS Hall",
@@ -35,6 +28,7 @@ const newsItems: NewsItem[] = [
     img: "/news/nasha-mukt-bharat.jpg",
     alt: "Students and faculty holding a Nasha Mukt Bharat Abhiyaan banner at LBS Hall",
     account: "inst",
+    category: "General",
   },
   {
     id: 2,
@@ -45,6 +39,7 @@ const newsItems: NewsItem[] = [
     img: "/news/yoga-day-2026.jpg",
     alt: "Hundreds of participants seated on yoga mats across a green ground at IIT Kharagpur",
     account: "inst",
+    category: "Event",
   },
   {
     id: 3,
@@ -55,6 +50,7 @@ const newsItems: NewsItem[] = [
     img: "/news/nirf-2025.jpg",
     alt: "India Rankings 2025 graphic showing IIT Kharagpur's NIRF positions",
     account: "inst",
+    category: "Academic",
   },
   {
     id: 4,
@@ -65,11 +61,34 @@ const newsItems: NewsItem[] = [
     img: "/news/foundation-day-75.jpg",
     alt: "75th Foundation Day poster showing the IIT Kharagpur main building",
     account: "tsg",
+    category: "Event",
   },
 ];
 
 export default function NewsSidebar() {
   const [showAllMobile, setShowAllMobile] = useState(false);
+  const [newsItems, setNewsItems] = useState<NewsItem[]>(DEFAULT_NEWS);
+
+  useEffect(() => {
+    async function fetchNotices() {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const res = await fetch(`${baseUrl}/notices`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+            setNewsItems(json.data.map((item: any) => ({
+              ...item,
+              account: (item.account === 'tsg' ? 'tsg' : 'inst') as keyof typeof ACCOUNTS,
+            })));
+          }
+        }
+      } catch (err) {
+        console.warn("Could not fetch notices from backend API, using fallback notices", err);
+      }
+    }
+    fetchNotices();
+  }, []);
 
   return (
     <>
@@ -82,7 +101,7 @@ export default function NewsSidebar() {
               {newsItems.map((item) => (
                 <a
                   key={item.id}
-                  href={ACCOUNTS[item.account].url}
+                  href={ACCOUNTS[item.account]?.url || "https://www.instagram.com/iit.kgp/"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm font-inter text-gray-700 hover:text-[#FF7F00] transition-colors"
@@ -103,7 +122,7 @@ export default function NewsSidebar() {
             {newsItems.map(item => (
               <a
                 key={item.id}
-                href={ACCOUNTS[item.account].url}
+                href={ACCOUNTS[item.account]?.url || "https://www.instagram.com/iit.kgp/"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors"
@@ -124,25 +143,34 @@ export default function NewsSidebar() {
 
       {/* Desktop Vertical Sidebar */}
       <div className="hidden md:flex flex-col h-full rounded-lg shadow-sm bg-white overflow-hidden border border-gray-200">
-        <div className="bg-[#FF7F00] text-white px-4 py-3 shrink-0">
+        <div className="bg-[#FF7F00] text-white px-4 py-3 shrink-0 flex justify-between items-center">
           <h3 className="font-lexend font-semibold text-base xl:text-lg m-0 whitespace-nowrap tracking-tight truncate">News & Announcements</h3>
+          <span className="text-xs font-inter bg-white/20 px-2 py-0.5 rounded-full">{newsItems.length}</span>
         </div>
         <div className="overflow-y-auto flex-1 p-3 space-y-4 custom-scrollbar">
           {newsItems.map((item) => (
             <a
               key={item.id}
-              href={ACCOUNTS[item.account].url}
+              href={ACCOUNTS[item.account]?.url || "https://www.instagram.com/iit.kgp/"}
               target="_blank"
               rel="noopener noreferrer"
               className="group block bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md hover:border-[#FF7F00]/40 transition-all no-underline"
             >
-              <div className="h-32 bg-gray-100 overflow-hidden">
+              <div className="h-32 bg-gray-100 overflow-hidden relative">
                 <img
-                  src={item.img}
-                  alt={item.alt}
+                  src={item.img || "/news/nasha-mukt-bharat.jpg"}
+                  alt={item.alt || item.title}
                   loading="lazy"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?w=600&auto=format&fit=crop&q=60';
+                  }}
                 />
+                {item.category && (
+                  <span className="absolute top-2 right-2 text-[10px] uppercase tracking-wider font-semibold font-inter bg-[#FF7F00] text-white px-2 py-0.5 rounded">
+                    {item.category}
+                  </span>
+                )}
               </div>
               <div className="p-3">
                 <h4 className="font-bold text-[15px] font-lexend text-gray-900 leading-tight mb-1 group-hover:text-[#FF7F00] transition-colors">
@@ -150,7 +178,7 @@ export default function NewsSidebar() {
                 </h4>
                 <div className="flex items-center gap-1.5 mb-2 text-[11px] text-gray-500 font-inter">
                   <i className="fab fa-instagram text-[#FF7F00]"></i>
-                  <span className="truncate">{ACCOUNTS[item.account].handle}</span>
+                  <span className="truncate">{ACCOUNTS[item.account]?.handle || "iit.kgp"}</span>
                   <span className="text-gray-300">·</span>
                   <time dateTime={item.iso} className="whitespace-nowrap">{item.date}</time>
                 </div>
