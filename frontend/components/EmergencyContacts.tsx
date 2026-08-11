@@ -84,6 +84,77 @@ const campusGroups: Group[] = [
   },
 ];
 
+type SecurityContact = {
+  label: string;
+  number: string;
+  type: 'landline' | 'mobile';
+  availability: string;
+  description?: string;
+};
+
+const securityContacts: SecurityContact[] = [
+  {
+    label: "Security Control Room",
+    number: "032222-81001",
+    type: "landline",
+    availability: "24×7",
+    description: "Main security control room — report any campus emergency",
+  },
+  {
+    label: "Security Control Room",
+    number: "032222-82751",
+    type: "landline",
+    availability: "24×7",
+    description: "Alternate security control room line",
+  },
+  {
+    label: "QRT Team",
+    number: "032222-81002",
+    type: "landline",
+    availability: "24×7",
+    description: "Quick Response Team landline 1",
+  },
+  {
+    label: "QRT Team",
+    number: "032222-81003",
+    type: "landline",
+    availability: "24×7",
+    description: "Quick Response Team landline 2",
+  },
+  {
+    label: "Puri Gate",
+    number: "032222-82765",
+    type: "landline",
+    availability: "24×7",
+    description: "Puri Gate security checkpoint",
+  },
+  {
+    label: "Duty Officer",
+    number: "9474984524",
+    type: "mobile",
+    availability: "24×7",
+  },
+  {
+    label: "Lady QRT",
+    number: "9474984542",
+    type: "mobile",
+    availability: "24×7",
+  },
+  {
+    label: "QRT Team",
+    number: "9531765049",
+    type: "mobile",
+    availability: "24×7",
+  },
+  {
+    label: "QRT Team",
+    number: "8531765048",
+    type: "mobile",
+    availability: "24×7",
+  },
+];
+
+
 const townGroups: Group[] = [
   {
     title: "Police & Fire",
@@ -260,6 +331,84 @@ export default function EmergencyContacts() {
                   )}
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Campus Security */}
+          <div>
+            <h4 className="font-lexend font-semibold text-base text-gray-900 mb-3 flex items-center gap-2">
+              <i className="fas fa-shield-halved text-blue-600 text-sm"></i>
+              Campus Security
+              <span className="ml-auto text-[10px] font-inter font-semibold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full flex items-center gap-1.5">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                Available 24×7
+              </span>
+            </h4>
+
+            {/* Landlines */}
+            <div className="mb-3">
+              <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider font-inter mb-2 flex items-center gap-1.5">
+                <i className="fas fa-phone text-[10px]"></i> Landlines
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {securityContacts
+                  .filter((c) => c.type === 'landline')
+                  .map((c, i) => (
+                    <a
+                      key={`${c.label}-${i}`}
+                      href={telHref(c.number)}
+                      className="group flex items-start gap-3 bg-white border border-blue-200 rounded-xl p-3.5 no-underline transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:border-blue-400"
+                    >
+                      <div className="w-9 h-9 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                        <i className="fas fa-phone-volume"></i>
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="font-lexend font-semibold text-[12px] text-gray-800 leading-snug">{c.label}</span>
+                        <span className="font-lexend font-bold text-base text-blue-700 tabular-nums leading-tight mt-0.5 group-hover:text-blue-900">{c.number}</span>
+                        {c.description && (
+                          <span className="text-[10px] text-gray-500 font-inter leading-snug mt-1">{c.description}</span>
+                        )}
+                      </div>
+                    </a>
+                  ))}
+              </div>
+            </div>
+
+            {/* Mobiles */}
+            <div>
+              <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider font-inter mb-2 flex items-center gap-1.5">
+                <i className="fas fa-mobile-screen text-[10px]"></i> Mobile Numbers
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {securityContacts
+                  .filter((c) => c.type === 'mobile')
+                  .map((c, i) => (
+                    <a
+                      key={`${c.label}-mob-${i}`}
+                      href={telHref(c.number)}
+                      className="group flex items-center gap-3 bg-white border border-green-200 rounded-xl p-3.5 no-underline transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:border-green-400"
+                    >
+                      <div className="w-9 h-9 rounded-lg bg-green-100 text-green-600 flex items-center justify-center text-sm shrink-0 group-hover:bg-green-600 group-hover:text-white transition-colors">
+                        <i className="fas fa-mobile-screen-button"></i>
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="font-lexend font-semibold text-[12px] text-gray-800 leading-snug">{c.label}</span>
+                        <span className="font-lexend font-bold text-[15px] text-green-700 tabular-nums leading-tight mt-0.5 group-hover:text-green-900">{c.number}</span>
+                      </div>
+                    </a>
+                  ))}
+              </div>
+            </div>
+
+            {/* QRT note */}
+            <div className="mt-3 flex items-start gap-2.5 rounded-lg bg-blue-50 border border-blue-200/60 p-3">
+              <i className="fas fa-circle-info text-blue-500 text-xs mt-0.5 shrink-0"></i>
+              <p className="text-[11px] text-blue-800 font-inter leading-relaxed m-0">
+                <span className="font-semibold">*QRT = Quick Response Team</span> — campus patrol available round-the-clock for any security emergency. Tap any number above to dial directly on mobile.
+              </p>
             </div>
           </div>
 

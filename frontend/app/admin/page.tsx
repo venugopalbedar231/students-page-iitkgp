@@ -52,6 +52,9 @@ export default function AdminPage() {
   const [savingNotice, setSavingNotice] = useState<boolean>(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState<boolean>(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageUploading, setImageUploading] = useState<boolean>(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -130,12 +133,14 @@ export default function AdminPage() {
       title: '',
       category: 'General',
       account: 'inst',
-      img: '/news/nasha-mukt-bharat.jpg',
+      img: '',
       alt: '',
       date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
       iso: new Date().toISOString().split('T')[0],
       desc: '',
     });
+    setImageFile(null);
+    setImagePreview(null);
     setIsModalOpen(true);
   };
 
@@ -151,7 +156,49 @@ export default function AdminPage() {
       iso: notice.iso,
       desc: notice.desc,
     });
+    setImageFile(null);
+    setImagePreview(notice.img || null);
     setIsModalOpen(true);
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !token) return;
+
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+    setImageUploading(true);
+
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+
+      const res = await fetch(`${API_URL}/upload/image`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: fd,
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Image upload failed');
+      }
+
+      setFormData((prev) => ({ ...prev, img: data.url }));
+      setImagePreview(data.url);
+    } catch (err: any) {
+      alert(err.message || 'Failed to upload image to Cloudinary');
+      setImageFile(null);
+      setImagePreview(null);
+    } finally {
+      setImageUploading(false);
+    }
+  };
+
+  const handleClearImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    setFormData((prev) => ({ ...prev, img: '' }));
   };
 
   const handleSaveNotice = async (e: React.FormEvent) => {
@@ -518,15 +565,68 @@ export default function AdminPage() {
                 </div>
               </div>
 
+              {/* Image Upload Section */}
               <div>
-                <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Image Path / URL</label>
-                <input
-                  type="text"
-                  value={formData.img}
-                  onChange={(e) => setFormData({ ...formData, img: e.target.value })}
-                  placeholder="/news/nasha-mukt-bharat.jpg"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#FF7F00]"
-                />
+                <label className="block text-xs font-semibold text-gray-700 uppercase mb-2">Notice Image</label>
+
+                {/* Preview / Dropzone */}
+                {imagePreview ? (
+                  <div className="relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50" style={{ height: '160px' }}>
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                    {imageUploading && (
+                      <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-2">
+                        <i className="fas fa-spinner fa-spin text-white text-2xl"></i>
+                        <span className="text-white text-xs font-semibold">Uploading to Cloudinary…</span>
+                      </div>
+                    )}
+                    {!imageUploading && (
+                      <button
+                        type="button"
+                        onClick={handleClearImage}
+                        className="absolute top-2 right-2 w-7 h-7 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center text-xs shadow transition-colors"
+                        title="Remove image"
+                      >
+                        <i className="fas fa-times"></i>
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <label
+                    htmlFor="imageUploadInput"
+                    className="flex flex-col items-center justify-center gap-2 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-orange-50 hover:border-[#FF7F00] transition-colors"
+                  >
+                    <i className="fas fa-cloud-upload-alt text-2xl text-gray-400"></i>
+                    <span className="text-xs font-semibold text-gray-500">Click to upload image</span>
+                    <span className="text-[10px] text-gray-400">JPEG, PNG, WebP, GIF — max 5 MB</span>
+                    <input
+                      id="imageUploadInput"
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      className="hidden"
+                      onChange={handleImageChange}
+                      disabled={imageUploading}
+                    />
+                  </label>
+                )}
+
+                {/* URL fallback / display */}
+                <div className="mt-2">
+                  <label className="block text-[10px] text-gray-400 mb-1">Or enter image URL directly</label>
+                  <input
+                    type="text"
+                    value={formData.img}
+                    onChange={(e) => {
+                      setFormData({ ...formData, img: e.target.value });
+                      setImagePreview(e.target.value || null);
+                    }}
+                    placeholder="https://res.cloudinary.com/… or /news/image.jpg"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-[#FF7F00] text-gray-500"
+                  />
+                </div>
               </div>
 
               <div>
