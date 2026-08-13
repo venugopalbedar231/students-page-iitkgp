@@ -24,10 +24,28 @@ export default function AdminPage() {
   const [adminEmail, setAdminEmail] = useState<string>('');
 
   // Login Form State
-  const [emailInput, setEmailInput] = useState<string>('admin@iitkgp.ac.in');
+  const [emailInput, setEmailInput] = useState<string>('parammhta444@gmail.com');
   const [passwordInput, setPasswordInput] = useState<string>('');
   const [authLoading, setAuthLoading] = useState<boolean>(false);
   const [authError, setAuthError] = useState<string | null>(null);
+
+  // OTP Login State
+  const [authMode, setAuthMode] = useState<'OTP' | 'PASSWORD'>('OTP');
+  const [loginStep, setLoginStep] = useState<'EMAIL' | 'OTP_INPUT'>('EMAIL');
+  const [otpInput, setOtpInput] = useState<string>('');
+  const [otpSuccessMessage, setOtpSuccessMessage] = useState<string | null>(null);
+  const [resendCooldown, setResendCooldown] = useState<number>(0);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (resendCooldown > 0) {
+      timer = setInterval(() => {
+        setResendCooldown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
 
   // Notices Dashboard State
   const [notices, setNotices] = useState<Notice[]>([]);
@@ -83,7 +101,66 @@ export default function AdminPage() {
     }
   };
 
-  // Auth Login Handler
+  // OTP Handlers
+  const handleSendOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setAuthError(null);
+    setOtpSuccessMessage(null);
+    setAuthLoading(true);
+
+    try {
+      const res = await fetch(`${API_URL}/auth/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailInput, password: passwordInput }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Invalid email or password.');
+      }
+
+      setLoginStep('OTP_INPUT');
+      setOtpSuccessMessage('A 6-digit verification OTP code has been sent to your email.');
+      setResendCooldown(60);
+    } catch (err: any) {
+      setAuthError(err.message || 'Failed to send OTP. Please try again.');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+    setOtpSuccessMessage(null);
+    setAuthLoading(true);
+
+    try {
+      const res = await fetch(`${API_URL}/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailInput, otp: otpInput }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Invalid or expired OTP code');
+      }
+
+      setToken(data.accessToken);
+      setAdminEmail(data.admin.email);
+      localStorage.setItem('adminToken', data.accessToken);
+      localStorage.setItem('adminEmail', data.admin.email);
+      fetchNotices();
+    } catch (err: any) {
+      setAuthError(err.message || 'OTP verification failed. Please try again.');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  // Auth Login Handler (Password mode)
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError(null);
@@ -274,10 +351,10 @@ export default function AdminPage() {
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 py-8">
         {!token ? (
-          /* SIMPLE LOGIN VIEW */
+          /* LOGIN VIEW WITH EMAIL OTP & PASSWORD MODES */
           <div className="max-w-md mx-auto my-12 bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
             <div className="bg-[#FF7F00] p-6 text-white text-center">
-              <i className="fas fa-[#user-shield] text-4xl mb-2"></i>
+              <i className="fas fa-user-shield text-4xl mb-2"></i>
               <h2 className="font-lexend text-2xl font-bold">Admin Portal Login</h2>
               <p className="text-xs text-orange-100 mt-1">
                 IIT Kharagpur Student Page Management
@@ -286,62 +363,145 @@ export default function AdminPage() {
 
             <div className="p-6">
               {authError && (
-                <div className="mb-4 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded">
-                  <i className="fas fa-exclamation-circle mr-2"></i> {authError}
+                <div className="mb-4 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded flex items-start gap-2">
+                  <i className="fas fa-exclamation-circle mt-0.5"></i>
+                  <span>{authError}</span>
                 </div>
               )}
 
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-                    Email Address
-                  </label>
-                  <div className="relative">
-                    <i className="fas fa-envelope absolute left-3 top-3.5 text-gray-400"></i>
-                    <input
-                      type="email"
-                      value={emailInput}
-                      onChange={(e) => setEmailInput(e.target.value)}
-                      required
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FF7F00] focus:border-[#FF7F00] outline-none"
-                      placeholder="admin@iitkgp.ac.in"
-                    />
-                  </div>
+              {otpSuccessMessage && (
+                <div className="mb-4 p-3 bg-green-50 border-l-4 border-green-500 text-green-700 text-sm rounded flex items-start gap-2">
+                  <i className="fas fa-check-circle mt-0.5"></i>
+                  <span>{otpSuccessMessage}</span>
                 </div>
+              )}
 
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <i className="fas fa-lock absolute left-3 top-3.5 text-gray-400"></i>
-                    <input
-                      type="password"
-                      value={passwordInput}
-                      onChange={(e) => setPasswordInput(e.target.value)}
-                      required
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FF7F00] focus:border-[#FF7F00] outline-none"
-                      placeholder="••••••••"
-                    />
+              {loginStep === 'EMAIL' ? (
+                /* STEP 1: Enter Email + Password to Request OTP */
+                <form onSubmit={handleSendOtp} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                      Admin Email Address
+                    </label>
+                    <div className="relative">
+                      <i className="fas fa-envelope absolute left-3 top-3.5 text-gray-400"></i>
+                      <input
+                        type="email"
+                        value={emailInput}
+                        onChange={(e) => setEmailInput(e.target.value)}
+                        required
+                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FF7F00] focus:border-[#FF7F00] outline-none"
+                        placeholder="admin@iitkgp.ac.in"
+                      />
+                    </div>
                   </div>
-                </div>
 
-                <button
-                  type="submit"
-                  disabled={authLoading}
-                  className="w-full py-3 bg-[#FF7F00] hover:bg-[#e06f00] text-white font-semibold text-sm rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2"
-                >
-                  {authLoading ? (
-                    <>
-                      <i className="fas fa-spinner fa-spin"></i> Authenticating...
-                    </>
-                  ) : (
-                    <>
-                      <i className="fas fa-sign-in-alt"></i> Login to Dashboard
-                    </>
-                  )}
-                </button>
-              </form>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <i className="fas fa-lock absolute left-3 top-3.5 text-gray-400"></i>
+                      <input
+                        type="password"
+                        value={passwordInput}
+                        onChange={(e) => setPasswordInput(e.target.value)}
+                        required
+                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FF7F00] focus:border-[#FF7F00] outline-none"
+                        placeholder="••••••••"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={authLoading}
+                    className="w-full py-3 bg-[#FF7F00] hover:bg-[#e06f00] text-white font-semibold text-sm rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2"
+                  >
+                    {authLoading ? (
+                      <>
+                        <i className="fas fa-spinner fa-spin"></i> Verifying Credentials...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-[#key] text-[#FF7F00]"></i> Verify & Send OTP Code
+                      </>
+                    )}
+                  </button>
+                </form>
+              ) : (
+                /* STEP 2: Enter 6-Digit OTP Code */
+                <form onSubmit={handleVerifyOtp} className="space-y-4">
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Enter 6-Digit OTP Code
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLoginStep('EMAIL');
+                          setOtpInput('');
+                          setOtpSuccessMessage(null);
+                        }}
+                        className="text-xs text-[#FF7F00] hover:underline font-medium"
+                      >
+                        Back to Login
+                      </button>
+                    </div>
+
+                    <p className="text-xs text-gray-500 mb-3">
+                      Sent to: <span className="font-semibold text-gray-700">{emailInput}</span>
+                    </p>
+
+                    <div className="relative">
+                      <i className="fas fa-shield-alt absolute left-3 top-3.5 text-gray-400"></i>
+                      <input
+                        type="text"
+                        maxLength={6}
+                        value={otpInput}
+                        onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ''))}
+                        required
+                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-lg tracking-[0.3em] font-mono font-bold focus:ring-2 focus:ring-[#FF7F00] focus:border-[#FF7F00] outline-none text-center"
+                        placeholder="123456"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={authLoading || otpInput.length !== 6}
+                    className="w-full py-3 bg-[#FF7F00] hover:bg-[#e06f00] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold text-sm rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2"
+                  >
+                    {authLoading ? (
+                      <>
+                        <i className="fas fa-spinner fa-spin"></i> Verifying OTP...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-check-circle"></i> Verify OTP & Login
+                      </>
+                    )}
+                  </button>
+
+                  <div className="text-center pt-2">
+                    {resendCooldown > 0 ? (
+                      <p className="text-xs text-gray-400">
+                        Resend OTP code in <span className="font-bold text-gray-600">{resendCooldown}s</span>
+                      </p>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleSendOtp()}
+                        disabled={authLoading}
+                        className="text-xs text-[#FF7F00] font-semibold hover:underline"
+                      >
+                        Resend OTP Code
+                      </button>
+                    )}
+                  </div>
+                </form>
+              )}
             </div>
           </div>
         ) : (

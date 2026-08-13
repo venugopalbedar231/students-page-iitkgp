@@ -8,6 +8,11 @@ async function main() {
 
   const accounts = [
     {
+      email: 'parammhta444@gmail.com',
+      name: 'Param (IIT KGP Admin)',
+      password: 'admin123',
+    },
+    {
       email: 'admin@iitkgp.ac.in',
       name: 'IIT KGP Admin',
       password: 'admin123',

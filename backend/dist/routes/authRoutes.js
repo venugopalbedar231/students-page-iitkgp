@@ -5,5 +5,7 @@ const authController_1 = require("../controllers/authController");
 const rateLimiter_1 = require("../middleware/rateLimiter");
 const router = (0, express_1.Router)();
 router.post('/login', rateLimiter_1.apiLimiter, authController_1.login);
+router.post('/send-otp', rateLimiter_1.otpLimiter, authController_1.sendOtp);
+router.post('/verify-otp', rateLimiter_1.apiLimiter, authController_1.verifyOtp);
 router.post('/logout', authController_1.logout);
 exports.default = router;
