@@ -88,7 +88,6 @@ const tracks: Track[] = [
 type Doc = {
   title: string;
   href: string;
-  meta: string;
   desc: string;
   icon: string;
 };
@@ -97,43 +96,30 @@ const docs: Doc[] = [
   {
     title: "UG Admission Manual 2024",
     href: UG_MANUAL,
-    meta: "PDF · 32 pages · 5.1 MB",
     desc: "Registration walkthrough, fee structure, tuition-fee waiver, documents to upload, and the curriculum reforms summarised above.",
     icon: "fas fa-file-lines",
   },
   {
     title: "Faculty Advisor Handbook",
     href: FA_HANDBOOK,
-    meta: "PDF · 2026 Issue-I · 24.1 MB",
     desc: "The full UG rules: micro-specialization, double major, minor, SAIP/SAPP, EAA, supplementary exams, medical leave, switch-overs and the faculty advisor directory.",
     icon: "fas fa-book-open",
   },
 ];
 
 function DocCard({ doc }: { doc: Doc }) {
-  const [open, setOpen] = useState(false);
-  // Mount the iframe on first preview and keep it: the animation needs the wrapper to stay in
-  // the DOM to transition, and re-opening shouldn't refetch 24 MB. Nothing loads until asked.
-  const [mounted, setMounted] = useState(false);
-
-  const toggle = () => {
-    setMounted(true);
-    setOpen((v) => !v);
-  };
-
   return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-      <div className="flex items-start gap-3 p-4">
+    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden p-4">
+      <div className="flex items-start gap-3">
         <div className="w-10 h-10 rounded-lg bg-[#FFF2E5] text-[#FF7F00] flex items-center justify-center text-lg shrink-0">
           <i className={doc.icon}></i>
         </div>
 
         <div className="min-w-0 flex-1">
-          <h5 className="font-lexend font-semibold text-base text-gray-900 m-0 mb-0.5 leading-snug">{doc.title}</h5>
-          <span className="text-xs text-gray-400 font-inter tabular-nums">{doc.meta}</span>
-          <p className="text-sm text-gray-500 font-inter leading-relaxed m-0 mt-2">{doc.desc}</p>
+          <h5 className="font-lexend font-semibold text-base text-gray-900 m-0 leading-snug">{doc.title}</h5>
+          <p className="text-sm text-gray-500 font-inter leading-relaxed m-0 mt-1.5">{doc.desc}</p>
 
-          <div className="flex flex-wrap items-center gap-2 mt-3">
+          <div className="mt-3">
             <a
               href={doc.href}
               download
@@ -142,45 +128,7 @@ function DocCard({ doc }: { doc: Doc }) {
               <i className="fas fa-download text-xs"></i>
               Download
             </a>
-            {/* The handbook is 24 MB — the preview iframe only mounts once asked for. */}
-            <button
-              onClick={toggle}
-              aria-expanded={open}
-              className="inline-flex items-center justify-center gap-2 max-md:min-h-11 bg-white text-gray-600 border border-gray-200 font-inter font-semibold text-xs sm:text-sm px-4 py-2 rounded-full hover:border-[#FF7F00] hover:text-[#FF7F00] transition-colors"
-            >
-              <i
-                className={`fas fa-chevron-down text-xs transition-transform duration-300 motion-reduce:transition-none ${
-                  open ? 'rotate-180' : ''
-                }`}
-              ></i>
-              {open ? 'Hide preview' : 'Preview'}
-            </button>
-            <a
-              href={doc.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-inter font-semibold text-gray-400 hover:text-[#FF7F00] no-underline px-1 max-md:min-h-11 max-md:items-center"
-            >
-              Open in new tab
-              <i className="fas fa-arrow-up-right-from-square text-xs"></i>
-            </a>
           </div>
-        </div>
-      </div>
-
-      <div
-        className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none ${
-          open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
-        }`}
-      >
-        <div className="overflow-hidden min-h-0">
-          {mounted && (
-            <iframe
-              src={doc.href}
-              title={doc.title}
-              className="w-full h-[60vh] md:h-[75vh] border-0 border-t border-gray-200 bg-gray-50"
-            />
-          )}
         </div>
       </div>
     </div>
