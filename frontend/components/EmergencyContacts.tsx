@@ -8,7 +8,7 @@ import React, { useState } from 'react';
  */
 type Contact = { label: string; numbers: string[]; note?: string };
 type Group = { title: string; icon: string; contacts: Contact[] };
-type Office = { role: string; numbers: string[]; email?: string; note?: string };
+type Office = { role: string; name?: string; numbers: string[]; email?: string; note?: string };
 
 function telHref(raw: string): string {
   const digits = raw.replace(/\D/g, '');
@@ -38,6 +38,7 @@ const emergency: Contact[] = [
  */
 const offices: Office[] = [
   {
+    name: "Sangekar Rajas Madhav",
     role: "Vice President, TSG",
     numbers: ["+91 99752 61910"],
     note: "Technology Students' Gymkhana",
@@ -49,9 +50,8 @@ const offices: Office[] = [
   },
   {
     role: "Dean, Student Affairs",
-    numbers: ["82038"],
+    numbers: ["032222-82038"],
     email: "deansa@hijli.iitkgp.ac.in",
-    note: "Institute student affairs office",
   },
 ];
 
@@ -316,9 +316,20 @@ export default function EmergencyContacts() {
                       <i className="fas fa-user-tie"></i>
                     </div>
 
-                    <span className="font-lexend font-semibold text-[13px] text-gray-900 leading-snug mb-2">
-                      {o.role}
-                    </span>
+                    {o.name ? (
+                      <div className="flex flex-col mb-2">
+                        <span className="font-lexend font-bold text-sm text-gray-900 leading-snug">
+                          {o.name}
+                        </span>
+                        <span className="text-[12px] font-inter font-medium text-gray-500 leading-snug mt-0.5">
+                          {o.role}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="font-lexend font-semibold text-[13px] text-gray-900 leading-snug mb-2">
+                        {o.role}
+                      </span>
+                    )}
 
                     <div className="flex flex-col mb-1.5">
                       {o.numbers.map((n) => (
@@ -346,7 +357,7 @@ export default function EmergencyContacts() {
               <h4 className="font-lexend font-semibold text-base text-gray-900 mb-3 flex items-center gap-2">
                 <i className="fas fa-shield-halved text-blue-600 text-sm"></i>
                 Campus Security
-                <span className="ml-auto text-[10px] font-inter font-semibold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full flex items-center gap-1.5">
+                <span className="ml-auto text-xs font-inter font-semibold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
@@ -357,8 +368,8 @@ export default function EmergencyContacts() {
 
               {/* Landlines */}
               <div className="mb-3">
-                <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider font-inter mb-2 flex items-center gap-1.5">
-                  <i className="fas fa-phone text-[10px]"></i> Landlines
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider font-inter mb-2 flex items-center gap-1.5">
+                  <i className="fas fa-phone text-xs"></i> Landlines
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {securityContacts
@@ -373,10 +384,10 @@ export default function EmergencyContacts() {
                           <i className="fas fa-phone-volume"></i>
                         </div>
                         <div className="flex flex-col min-w-0">
-                          <span className="font-lexend font-semibold text-[12px] text-gray-800 leading-snug">{c.label}</span>
+                          <span className="font-lexend font-semibold text-xs sm:text-[13px] text-gray-800 leading-snug">{c.label}</span>
                           <span className="font-lexend font-bold text-base text-blue-700 tabular-nums leading-tight mt-0.5 group-hover:text-blue-900">{c.number}</span>
                           {c.description && (
-                            <span className="text-[10px] text-gray-500 font-inter leading-snug mt-1">{c.description}</span>
+                            <span className="text-xs text-gray-500 font-inter leading-snug mt-1">{c.description}</span>
                           )}
                         </div>
                       </a>
@@ -386,8 +397,8 @@ export default function EmergencyContacts() {
 
               {/* Mobiles */}
               <div>
-                <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider font-inter mb-2 flex items-center gap-1.5">
-                  <i className="fas fa-mobile-screen text-[10px]"></i> Mobile Numbers
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider font-inter mb-2 flex items-center gap-1.5">
+                  <i className="fas fa-mobile-screen text-xs"></i> Mobile Numbers
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   {securityContacts
@@ -402,7 +413,7 @@ export default function EmergencyContacts() {
                           <i className="fas fa-mobile-screen-button"></i>
                         </div>
                         <div className="flex flex-col min-w-0">
-                          <span className="font-lexend font-semibold text-[12px] text-gray-800 leading-snug">{c.label}</span>
+                          <span className="font-lexend font-semibold text-xs sm:text-[13px] text-gray-800 leading-snug">{c.label}</span>
                           <span className="font-lexend font-bold text-[15px] text-green-700 tabular-nums leading-tight mt-0.5 group-hover:text-green-900">{c.number}</span>
                         </div>
                       </a>
@@ -413,7 +424,7 @@ export default function EmergencyContacts() {
               {/* QRT note */}
               <div className="mt-3 flex items-start gap-2.5 rounded-lg bg-blue-50 border border-blue-200/60 p-3">
                 <i className="fas fa-circle-info text-blue-500 text-xs mt-0.5 shrink-0"></i>
-                <p className="text-[11px] text-blue-800 font-inter leading-relaxed m-0">
+                <p className="text-xs sm:text-[13px] text-blue-800 font-inter leading-relaxed m-0">
                   <span className="font-semibold">*QRT = Quick Response Team</span> — campus patrol available round-the-clock for any security emergency. Tap any number above to dial directly on mobile.
                 </p>
               </div>
@@ -422,7 +433,7 @@ export default function EmergencyContacts() {
             {/* Dialling note */}
             <div className="flex items-start gap-3 rounded-xl bg-white border border-[#FF7F00]/30 p-3.5">
               <i className="fas fa-mobile-screen-button text-[#FF7F00] text-sm mt-0.5 shrink-0"></i>
-              <p className="text-xs text-gray-600 font-inter leading-relaxed m-0">
+              <p className="text-xs sm:text-sm text-gray-600 font-inter leading-relaxed m-0">
                 <span className="font-semibold text-gray-800">Calling from a mobile?</span>{" "}
                 Five-digit campus numbers need the prefix <span className="font-semibold text-gray-800">03222-2</span> —
                 so <span className="tabular-nums">82632</span> becomes{" "}

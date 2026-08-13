@@ -151,7 +151,7 @@ export default function Scholarships() {
 
           {/* Intro + stat strip */}
           <div>
-            <p className="text-sm text-gray-600 font-inter leading-relaxed m-0 mb-4 max-w-3xl">
+            <p className="text-sm sm:text-base text-gray-600 font-inter leading-relaxed m-0 mb-4 max-w-3xl">
               IIT Kharagpur funds its students through Institute scholarships awarded on merit-cum-means, plus a
               wide set of endowment and alumni-funded awards. Here are the essentials — the official page carries
               the complete, authoritative rules.
@@ -167,7 +167,7 @@ export default function Scholarships() {
                     <i className={s.icon}></i>
                   </div>
                   <span className="font-lexend font-bold text-2xl text-gray-900 leading-none mb-1.5">{s.value}</span>
-                  <span className="text-[11px] text-gray-500 font-inter leading-snug">{s.label}</span>
+                  <span className="text-xs sm:text-[13px] text-gray-500 font-inter leading-snug">{s.label}</span>
                 </div>
               ))}
             </div>
@@ -188,18 +188,18 @@ export default function Scholarships() {
                   <div className="w-10 h-10 rounded-lg bg-[#FFF2E5] text-[#FF7F00] flex items-center justify-center text-xl shrink-0">
                     <i className={sch.icon}></i>
                   </div>
-                  <span className="text-[10px] font-inter font-semibold uppercase tracking-wider text-[#FF7F00] bg-[#FFF2E5] px-2 py-1 rounded-full whitespace-nowrap">
+                  <span className="text-xs font-inter font-semibold uppercase tracking-wider text-[#FF7F00] bg-[#FFF2E5] px-2.5 py-1 rounded-full whitespace-nowrap">
                     {sch.tag}
                   </span>
                 </div>
 
-                <h4 className="font-lexend font-semibold text-[15px] text-gray-900 mb-1.5 leading-snug">{sch.name}</h4>
-                <p className="text-xs text-gray-500 font-inter leading-relaxed m-0 mb-3">{sch.summary}</p>
+                <h4 className="font-lexend font-semibold text-base text-gray-900 mb-1.5 leading-snug">{sch.name}</h4>
+                <p className="text-sm text-gray-500 font-inter leading-relaxed m-0 mb-3">{sch.summary}</p>
 
                 <ul className="list-none p-0 m-0 flex flex-col gap-2 mt-auto">
                   {sch.points.map((p, i) => (
-                    <li key={i} className="flex items-start gap-2 text-xs text-gray-700 font-inter leading-relaxed">
-                      <i className="fas fa-check text-[#FF7F00] text-[10px] mt-1 shrink-0"></i>
+                    <li key={i} className="flex items-start gap-2 text-xs sm:text-sm text-gray-700 font-inter leading-relaxed">
+                      <i className="fas fa-check text-[#FF7F00] text-xs mt-1 shrink-0"></i>
                       <span>{p}</span>
                     </li>
                   ))}
@@ -225,7 +225,7 @@ export default function Scholarships() {
                   </div>
                   <ul className="list-none p-0 m-0 flex flex-col gap-2.5">
                     {c.items.map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-xs text-gray-600 font-inter leading-relaxed">
+                      <li key={i} className="flex items-start gap-2 text-xs sm:text-sm text-gray-600 font-inter leading-relaxed">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#FF7F00]/60 mt-1.5 shrink-0"></span>
                         <span>{item}</span>
                       </li>
@@ -246,7 +246,7 @@ export default function Scholarships() {
               {goodToKnow.map((g, i) => (
                 <div key={i} className="flex items-start gap-2.5">
                   <i className={`${g.icon} text-[#FF7F00] text-xs mt-0.5 shrink-0 w-4 text-center`}></i>
-                  <p className="text-xs text-gray-600 font-inter leading-relaxed m-0">{g.text}</p>
+                  <p className="text-xs sm:text-sm text-gray-600 font-inter leading-relaxed m-0">{g.text}</p>
                 </div>
               ))}
             </div>
@@ -269,8 +269,8 @@ export default function Scholarships() {
                     <i className={r.icon}></i>
                   </div>
                   <div className="min-w-0">
-                    <p className="font-semibold text-gray-900 font-inter text-[13px] m-0 group-hover:text-[#FF7F00] truncate">{r.title}</p>
-                    <p className="text-[11px] text-gray-500 font-inter leading-snug m-0 truncate">{r.desc}</p>
+                    <p className="font-semibold text-gray-900 font-inter text-sm m-0 group-hover:text-[#FF7F00] truncate">{r.title}</p>
+                    <p className="text-xs text-gray-500 font-inter leading-snug m-0 truncate">{r.desc}</p>
                   </div>
                 </a>
               ))}
@@ -281,7 +281,7 @@ export default function Scholarships() {
           <div className="rounded-xl bg-gradient-to-r from-[#FF7F00] to-[#ff9e3d] p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
             <div>
               <p className="font-lexend font-semibold text-white text-base m-0 mb-1">Read the complete rules</p>
-              <p className="text-[13px] text-white/90 font-inter leading-relaxed m-0">
+              <p className="text-sm text-white/90 font-inter leading-relaxed m-0">
                 Full scholarship regulations, endowment list and application conditions live on the Institute site.
                 For queries, contact the Dean, Undergraduate Studies.
               </p>

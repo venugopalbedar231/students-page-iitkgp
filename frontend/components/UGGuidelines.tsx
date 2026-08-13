@@ -129,27 +129,27 @@ function DocCard({ doc }: { doc: Doc }) {
         </div>
 
         <div className="min-w-0 flex-1">
-          <h5 className="font-lexend font-semibold text-[15px] text-gray-900 m-0 mb-0.5 leading-snug">{doc.title}</h5>
-          <span className="text-[11px] text-gray-400 font-inter tabular-nums">{doc.meta}</span>
-          <p className="text-xs text-gray-500 font-inter leading-relaxed m-0 mt-2">{doc.desc}</p>
+          <h5 className="font-lexend font-semibold text-base text-gray-900 m-0 mb-0.5 leading-snug">{doc.title}</h5>
+          <span className="text-xs text-gray-400 font-inter tabular-nums">{doc.meta}</span>
+          <p className="text-sm text-gray-500 font-inter leading-relaxed m-0 mt-2">{doc.desc}</p>
 
           <div className="flex flex-wrap items-center gap-2 mt-3">
             <a
               href={doc.href}
               download
-              className="inline-flex items-center justify-center gap-2 max-md:min-h-11 bg-[#FF7F00] text-white font-inter font-semibold text-xs px-4 py-2 rounded-full no-underline hover:bg-[#e06f00] transition-colors"
+              className="inline-flex items-center justify-center gap-2 max-md:min-h-11 bg-[#FF7F00] text-white font-inter font-semibold text-xs sm:text-sm px-4 py-2 rounded-full no-underline hover:bg-[#e06f00] transition-colors"
             >
-              <i className="fas fa-download text-[11px]"></i>
+              <i className="fas fa-download text-xs"></i>
               Download
             </a>
             {/* The handbook is 24 MB — the preview iframe only mounts once asked for. */}
             <button
               onClick={toggle}
               aria-expanded={open}
-              className="inline-flex items-center justify-center gap-2 max-md:min-h-11 bg-white text-gray-600 border border-gray-200 font-inter font-semibold text-xs px-4 py-2 rounded-full hover:border-[#FF7F00] hover:text-[#FF7F00] transition-colors"
+              className="inline-flex items-center justify-center gap-2 max-md:min-h-11 bg-white text-gray-600 border border-gray-200 font-inter font-semibold text-xs sm:text-sm px-4 py-2 rounded-full hover:border-[#FF7F00] hover:text-[#FF7F00] transition-colors"
             >
               <i
-                className={`fas fa-chevron-down text-[10px] transition-transform duration-300 motion-reduce:transition-none ${
+                className={`fas fa-chevron-down text-xs transition-transform duration-300 motion-reduce:transition-none ${
                   open ? 'rotate-180' : ''
                 }`}
               ></i>
@@ -159,10 +159,10 @@ function DocCard({ doc }: { doc: Doc }) {
               href={doc.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs font-inter font-semibold text-gray-400 hover:text-[#FF7F00] no-underline px-1 max-md:min-h-11 max-md:items-center"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-inter font-semibold text-gray-400 hover:text-[#FF7F00] no-underline px-1 max-md:min-h-11 max-md:items-center"
             >
               Open in new tab
-              <i className="fas fa-arrow-up-right-from-square text-[10px]"></i>
+              <i className="fas fa-arrow-up-right-from-square text-xs"></i>
             </a>
           </div>
         </div>
@@ -219,7 +219,7 @@ export default function UGGuidelines() {
         <div className="max-md:overflow-hidden max-md:min-h-0">
         <div className="p-4 md:p-5 bg-[#fafafa] flex flex-col gap-5">
 
-          <p className="text-sm text-gray-600 font-inter leading-relaxed m-0 max-w-3xl">
+          <p className="text-sm sm:text-base text-gray-600 font-inter leading-relaxed m-0 max-w-3xl">
             The 2024 curriculum changed how you build your degree — you now pick most of the shape of it
             <em> after</em> you arrive. The essentials are below; the manuals at the bottom carry the full rules.
           </p>
@@ -234,9 +234,9 @@ export default function UGGuidelines() {
               {changes.map((c) => (
                 <span
                   key={c}
-                  className="inline-flex items-center gap-1.5 text-[11px] font-inter text-gray-600 bg-[#fafafa] border border-gray-200 rounded-full px-2.5 py-1"
+                  className="inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-inter text-gray-600 bg-[#fafafa] border border-gray-200 rounded-full px-3 py-1"
                 >
-                  <i className="fas fa-check text-[#FF7F00] text-[9px]"></i>
+                  <i className="fas fa-[#FF7F00] fa-check text-[10px]"></i>
                   {c}
                 </span>
               ))}
@@ -257,15 +257,15 @@ export default function UGGuidelines() {
                   <h5 className="font-lexend font-semibold text-[15px] text-gray-900 m-0 leading-snug">{t.title}</h5>
                 </div>
 
-                <span className="self-start text-[10px] font-inter font-semibold uppercase tracking-wider text-[#FF7F00] bg-[#FFF2E5] px-2 py-1 rounded-full mb-2.5">
+                <span className="self-start text-xs font-inter font-semibold uppercase tracking-wider text-[#FF7F00] bg-[#FFF2E5] px-2.5 py-1 rounded-full mb-2.5">
                   {t.chip}
                 </span>
 
-                <p className="text-xs text-gray-500 font-inter leading-relaxed m-0 mb-3">{t.blurb}</p>
+                <p className="text-sm text-gray-500 font-inter leading-relaxed m-0 mb-3">{t.blurb}</p>
 
                 <ul className="list-none p-0 m-0 flex flex-col gap-2 mt-auto">
                   {t.points.map((p, i) => (
-                    <li key={i} className="flex items-start gap-2 text-xs text-gray-700 font-inter leading-relaxed">
+                    <li key={i} className="flex items-start gap-2 text-xs sm:text-sm text-gray-700 font-inter leading-relaxed">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#FF7F00]/60 mt-1.5 shrink-0"></span>
                       <span>{p}</span>
                     </li>
@@ -280,16 +280,16 @@ export default function UGGuidelines() {
                 <i className="fas fa-circle-question"></i>
               </div>
               <h5 className="font-lexend font-semibold text-[15px] text-gray-900 m-0 mb-1.5 leading-snug">Need the detail?</h5>
-              <p className="text-xs text-gray-500 font-inter leading-relaxed m-0 mb-3">
+              <p className="text-sm text-gray-500 font-inter leading-relaxed m-0 mb-3">
                 Credit tables, Senate items and the exact eligibility wording live in the two manuals below.
               </p>
               <div className="flex flex-col gap-1.5">
-                <a href={UG_MANUAL} download className="inline-flex items-center gap-1.5 max-md:min-h-11 text-xs font-inter font-semibold text-[#FF7F00] hover:text-[#e06f00] no-underline">
-                  <i className="fas fa-download text-[10px]"></i>
+                <a href={UG_MANUAL} download className="inline-flex items-center gap-1.5 max-md:min-h-11 text-xs sm:text-sm font-inter font-semibold text-[#FF7F00] hover:text-[#e06f00] no-underline">
+                  <i className="fas fa-download text-xs"></i>
                   UG Admission Manual
                 </a>
-                <a href={FA_HANDBOOK} download className="inline-flex items-center gap-1.5 max-md:min-h-11 text-xs font-inter font-semibold text-[#FF7F00] hover:text-[#e06f00] no-underline">
-                  <i className="fas fa-download text-[10px]"></i>
+                <a href={FA_HANDBOOK} download className="inline-flex items-center gap-1.5 max-md:min-h-11 text-xs sm:text-sm font-inter font-semibold text-[#FF7F00] hover:text-[#e06f00] no-underline">
+                  <i className="fas fa-download text-xs"></i>
                   Faculty Advisor Handbook
                 </a>
               </div>

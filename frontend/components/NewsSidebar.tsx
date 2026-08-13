@@ -167,7 +167,7 @@ export default function NewsSidebar() {
                   }}
                 />
                 {item.category && (
-                  <span className="absolute top-2 right-2 text-[10px] uppercase tracking-wider font-semibold font-inter bg-[#FF7F00] text-white px-2 py-0.5 rounded">
+                  <span className="absolute top-2 right-2 text-xs uppercase tracking-wider font-semibold font-inter bg-[#FF7F00] text-white px-2 py-0.5 rounded">
                     {item.category}
                   </span>
                 )}
@@ -176,13 +176,13 @@ export default function NewsSidebar() {
                 <h4 className="font-bold text-[15px] font-lexend text-gray-900 leading-tight mb-1 group-hover:text-[#FF7F00] transition-colors">
                   {item.title}
                 </h4>
-                <div className="flex items-center gap-1.5 mb-2 text-[11px] text-gray-500 font-inter">
+                <div className="flex items-center gap-1.5 mb-2 text-xs text-gray-500 font-inter">
                   <i className="fab fa-instagram text-[#FF7F00]"></i>
                   <span className="truncate">{ACCOUNTS[item.account]?.handle || "iit.kgp"}</span>
                   <span className="text-gray-300">·</span>
                   <time dateTime={item.iso} className="whitespace-nowrap">{item.date}</time>
                 </div>
-                <p className="text-xs text-gray-700 font-inter leading-relaxed line-clamp-2 m-0">{item.desc}</p>
+                <p className="text-xs sm:text-sm text-gray-700 font-inter leading-relaxed line-clamp-2 m-0">{item.desc}</p>
               </div>
             </a>
           ))}

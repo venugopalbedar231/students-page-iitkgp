@@ -55,7 +55,7 @@ export default function ResourceCategory({ title, links, defaultOpen = false }: 
                   <i className={link.icon}></i>
                 </div>
                 <h4 className="font-semibold text-gray-900 font-inter text-sm mb-1 group-hover:text-[#FF7F00]">{link.title}</h4>
-                <p className="text-xs text-gray-500 font-inter leading-relaxed m-0">{link.desc}</p>
+                <p className="text-xs sm:text-sm text-gray-500 font-inter leading-relaxed m-0">{link.desc}</p>
               </a>
             ))}
           </div>
