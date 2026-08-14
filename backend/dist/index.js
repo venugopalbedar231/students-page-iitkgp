@@ -10,6 +10,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const noticeRoutes_1 = __importDefault(require("./routes/noticeRoutes"));
 const uploadRoutes_1 = __importDefault(require("./routes/uploadRoutes"));
+const academicRoutes_1 = __importDefault(require("./routes/academicRoutes"));
 const errorHandler_1 = require("./middleware/errorHandler");
 const rateLimiter_1 = require("./middleware/rateLimiter");
 dotenv_1.default.config();
@@ -20,7 +21,7 @@ const PORT = process.env.PORT || 5000;
 // Comma-separated list supported: "https://a.vercel.app,http://localhost:3000"
 const allowedOrigins = (process.env.FRONTEND_URL ||
     process.env.CORS_ORIGIN ||
-    'http://localhost:3000')
+    '')
     .split(',')
     .map((o) => o.trim())
     .filter(Boolean);
@@ -59,6 +60,7 @@ app.get('/api/health', (_req, res) => {
 app.use('/api/auth', authRoutes_1.default);
 app.use('/api/notices', noticeRoutes_1.default);
 app.use('/api/upload', uploadRoutes_1.default);
+app.use('/api/academic', academicRoutes_1.default);
 // Error Handler
 app.use(errorHandler_1.errorHandler);
 app.listen(PORT, () => {

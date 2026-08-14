@@ -30,7 +30,6 @@ const socialLinks = [
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [socialOpen, setSocialOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState("en");
 
@@ -109,15 +108,29 @@ export default function Header() {
                 <i className="fas fa-chevron-down text-[11px] text-white absolute right-0 pointer-events-none" />
               </div>
 
-              {/* Circular Search Button */}
-              <button
-                type="button"
-                onClick={() => setSearchOpen((v) => !v)}
+              {/* Circular Search Button -> Links to iitkgp.ac.in */}
+              <a
+                href="https://www.iitkgp.ac.in"
                 title="Search"
-                className="w-[34px] h-[34px] aspect-square rounded-full bg-white text-[#db5903] flex items-center justify-center border-0 cursor-pointer hover:bg-gray-100 transition-colors shrink-0 shadow-sm"
+                aria-label="Search IIT Kharagpur"
+                className="w-[34px] h-[34px] aspect-square rounded-full bg-white text-[#db5903] flex items-center justify-center border-0 cursor-pointer hover:bg-gray-100 transition-colors shrink-0 shadow-sm no-underline"
               >
-                <i className={`fas ${searchOpen ? "fa-xmark" : "fa-magnifying-glass"} text-[14px]`} />
-              </button>
+                <svg
+                  className="w-4 h-4 text-[#db5903]"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                  />
+                </svg>
+              </a>
             </div>
 
             {/* Desktop Right Controls (>= xl) */}
@@ -175,16 +188,30 @@ export default function Header() {
                 {/* Vertical Separator 2 */}
                 <li className="border-l border-white/70 h-3.5 mx-1.5" />
 
-                {/* Search Button (.searchNada) */}
+                {/* Search Button (.searchNada) -> Links to iitkgp.ac.in */}
                 <li className="flex items-center px-1">
-                  <button
-                    type="button"
-                    onClick={() => setSearchOpen((v) => !v)}
+                  <a
+                    href="https://www.iitkgp.ac.in"
                     title="Search"
-                    className="w-[42px] h-[42px] aspect-square rounded-full bg-white text-[#db5903] flex items-center justify-center border border-[#db5903] cursor-pointer hover:bg-gray-50 transition-colors shrink-0"
+                    aria-label="Search IIT Kharagpur"
+                    className="w-[40px] h-[40px] aspect-square rounded-full bg-white text-[#db5903] flex items-center justify-center border border-[#db5903] cursor-pointer hover:bg-gray-50 transition-colors shrink-0 no-underline shadow-sm"
                   >
-                    <i className={`far ${searchOpen ? "fa-times" : "fa-search"} text-[17px]`} />
-                  </button>
+                    <svg
+                      className="w-[18px] h-[18px] text-[#db5903]"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.4"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                      />
+                    </svg>
+                  </a>
                 </li>
 
                 {/* Scroll Down Arrow (#downArrow) */}
@@ -218,42 +245,6 @@ export default function Header() {
               </button>
             </div>
           </div>
-
-          {/* Search bar expandable drawer */}
-          {searchOpen && (
-            <div className="py-3 border-t border-white/20">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const target = e.currentTarget.elements.namedItem("q") as HTMLInputElement;
-                  if (target?.value) {
-                    window.open(
-                      `https://www.google.com/search?q=site:iitkgp.ac.in+${encodeURIComponent(
-                        target.value
-                      )}`,
-                      "_blank"
-                    );
-                  }
-                }}
-                className="flex items-center bg-white rounded-full overflow-hidden shadow-md max-w-xl mx-auto px-4 py-2 border border-orange-200"
-              >
-                <input
-                  name="q"
-                  type="search"
-                  placeholder="Indian Institute of Technology Kharagpur..."
-                  className="flex-1 px-3 py-1 text-[15px] text-gray-800 outline-none border-0 font-public-sans"
-                  autoFocus
-                />
-                <button
-                  type="submit"
-                  className="px-3 py-1 text-[#db5903] hover:text-[#b34015] border-0 bg-transparent cursor-pointer text-[18px]"
-                  aria-label="Submit search"
-                >
-                  <i className="far fa-search" />
-                </button>
-              </form>
-            </div>
-          )}
         </div>
       </div>
 

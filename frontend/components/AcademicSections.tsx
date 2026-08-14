@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import ResourceCategory from "./ResourceCategory";
+import { getApiUrl } from "@/lib/api";
 
 export type LinkItem = {
   title: string;
@@ -75,7 +76,7 @@ export default function AcademicSections({
   useEffect(() => {
     async function fetchLatestResources() {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+        const apiUrl = getApiUrl();
         const res = await fetch(`${apiUrl}/academic`, { cache: "no-store" });
         if (!res.ok) return;
 
