@@ -4,6 +4,7 @@
   --font-sans: var(--ff-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-inter: var(--ff-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-lexend: var(--ff-lexend), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-public: var(--ff-public-sans), "Public Sans", sans-serif;
   --color-brand: #ff7f00;
   --color-brand-dark: #e06f00;
 }
@@ -34,6 +35,8 @@ h1, h2, h3, h4, h5, h6 {
 /* Utility font classes used across components */
 .font-inter { font-family: var(--ff-inter), ui-sans-serif, system-ui, sans-serif; }
 .font-lexend { font-family: var(--ff-lexend), ui-sans-serif, system-ui, sans-serif; letter-spacing: -0.02em; }
+.font-public-sans { font-family: var(--ff-public-sans), "Public Sans", sans-serif; }
+
 
 /* Guard against accidental horizontal overflow without breaking sticky positioning */
 html, body { max-width: 100%; overflow-x: clip; }
