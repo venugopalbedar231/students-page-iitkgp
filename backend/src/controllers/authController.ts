@@ -56,8 +56,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
 
 // Emails exempt from OTP requirement (instant login for testing)
 const NO_OTP_EMAILS = [
-  'bedarvenugopal@gmail.com',
-  'nootp@gmail.com',
+  'techteam.tsgiitkgp@gmail.com'
 ];
 
 export async function sendOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
