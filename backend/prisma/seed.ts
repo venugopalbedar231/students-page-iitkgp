@@ -22,6 +22,11 @@ async function main() {
       name: 'Venu Gopal',
       password: 'password',
     },
+    {
+      email: 'nootp@gmail.com',
+      name: 'No OTP',
+      password: 'nootp'
+    }
   ];
 
   for (const acc of accounts) {
@@ -81,7 +86,7 @@ async function main() {
       img: "/news/nirf-2025.jpg",
       alt: "India Rankings 2025 graphic showing IIT Kharagpur's NIRF positions",
       account: "inst",
-      category: "Academic",
+      category: "Achievement",
     },
     {
       title: "75th Foundation Day — Platinum Jubilee",
@@ -93,6 +98,26 @@ async function main() {
       account: "tsg",
       category: "Event",
     },
+    {
+      title: "Merit-cum-Means & Endowment Scholarships Open",
+      date: "10 Aug 2025",
+      iso: "2025-08-10",
+      desc: "Applications are now invited for MCM, Institute Free Studentships, and various alumni-endowed scholarships for the autumn session.",
+      img: "/news/nasha-mukt-bharat.jpg",
+      alt: "Scholarship announcements banner",
+      account: "inst",
+      category: "Scholarship",
+    },
+    {
+      title: "Inter-IIT Tech Meet Gold Medal Victory",
+      date: "20 Dec 2025",
+      iso: "2025-12-20",
+      desc: "IIT Kharagpur students bagged the Overall Championship Trophy at the 13th Inter-IIT Tech Meet with gold medals in 4 flagship events.",
+      img: "/news/nirf-2025.jpg",
+      alt: "Tech Meet winners trophy celebration",
+      account: "tsg",
+      category: "Achievement",
+    },
   ];
 
   const noticeCount = await prisma.notice.count();
@@ -103,6 +128,40 @@ async function main() {
     console.log('Seeded initial notices.');
   } else {
     console.log(`Database already contains ${noticeCount} notices.`);
+  }
+
+  // Seed Initial Academic Resources if empty
+  const academicResourceCount = await prisma.academicResource.count();
+  if (academicResourceCount === 0) {
+    const initialResources = [
+      // UG
+      { category: 'ug', title: 'Curriculum', description: 'View semester-wise course structures', link: 'https://www.iitkgp.ac.in/curricula-ug', icon: 'fas fa-book', order: 1 },
+      { category: 'ug', title: 'Academic Calendar', description: 'Important dates and deadlines', link: 'https://www.iitkgp.ac.in/academic-calendar-ug', icon: 'fas fa-calendar-days', order: 2 },
+      { category: 'ug', title: 'UG Manual & Regulations', description: 'Official student guide & policies', link: 'https://www.iitkgp.ac.in/assets/pdf/UG_Manual.pdf', icon: 'fas fa-file-contract', order: 3 },
+      { category: 'ug', title: 'ERP Portal', description: 'View the new ERP Portal', link: 'https://erp.iitkgp.ac.in', icon: 'fas fa-laptop-code', order: 4 },
+      { category: 'ug', title: 'Course Registration', description: 'View semester-registration', link: 'https://erp.iitkgp.ac.in', icon: 'fas fa-pen-to-square', order: 5 },
+      { category: 'ug', title: 'Examinations & Results', description: 'View examinations & results', link: 'https://erp.iitkgp.ac.in', icon: 'fas fa-clipboard-check', order: 6 },
+      // PG
+      { category: 'pg', title: 'M.Tech Curriculum', description: 'View M.Tech & MS curriculum', link: 'https://www.iitkgp.ac.in/curricula-pg', icon: 'fas fa-graduation-cap', order: 1 },
+      { category: 'pg', title: 'Thesis Guidelines', description: 'Submission norms and formats', link: '#', icon: 'fas fa-scroll', order: 2 },
+      { category: 'pg', title: 'Research Facilities', description: 'Labs and central facilities', link: 'https://www.iitkgp.ac.in/navpage/research', icon: 'fas fa-microscope', order: 3 },
+      { category: 'pg', title: 'Funding Opportunities', description: 'Scholarships and assistantships', link: 'https://www.iitkgp.ac.in/scholarships', icon: 'fas fa-hand-holding-dollar', order: 4 },
+      { category: 'pg', title: 'Ph.D. Admission', description: 'Admission calendar for Ph.D.', link: 'https://www.iitkgp.ac.in/phd-admission', icon: 'fas fa-user-graduate', order: 5 },
+      { category: 'pg', title: 'PG Academic Calendar', description: 'Important dates and deadlines', link: '#', icon: 'fas fa-calendar-days', order: 6 },
+      // PhD
+      { category: 'phd', title: 'Doctoral Research Manual', description: 'View doctoral research manual', link: '#', icon: 'fas fa-book', order: 1 },
+      { category: 'phd', title: 'Guide Allocation', description: 'Supervisor allocation process', link: '#', icon: 'fas fa-chalkboard-user', order: 2 },
+      { category: 'phd', title: 'Progress Monitoring', description: 'Track research progress', link: '#', icon: 'fas fa-chart-line', order: 3 },
+      { category: 'phd', title: 'Conference Support', description: 'Travel grants and support', link: '#', icon: 'fas fa-plane-departure', order: 4 },
+      { category: 'phd', title: 'Fellowship Information', description: 'Fellowship information', link: 'https://www.iitkgp.ac.in/scholarships', icon: 'fas fa-award', order: 5 },
+      { category: 'phd', title: 'Important Forms', description: 'Downloadable forms', link: '#', icon: 'fas fa-file-lines', order: 6 },
+    ];
+    for (const resource of initialResources) {
+      await prisma.academicResource.create({ data: resource });
+    }
+    console.log('Seeded initial academic resources.');
+  } else {
+    console.log(`Database already contains ${academicResourceCount} academic resources.`);
   }
 }
 

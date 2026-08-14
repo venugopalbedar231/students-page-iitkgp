@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import noticeRoutes from './routes/noticeRoutes';
 import uploadRoutes from './routes/uploadRoutes';
+import academicRoutes from './routes/academicRoutes';
 import { errorHandler } from './middleware/errorHandler';
 import { apiLimiter } from './middleware/rateLimiter';
 
@@ -63,6 +64,7 @@ app.get('/api/health', (_req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/notices', noticeRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/academic', academicRoutes);
 
 // Error Handler
 app.use(errorHandler);

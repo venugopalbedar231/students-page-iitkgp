@@ -35,3 +35,16 @@ model Notice {
 
   @@map("notices")
 }
+model AcademicResource {
+  id          Int      @id @default(autoincrement())
+  category    String
+  title       String
+  description String
+  link        String
+  icon        String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("academic_resources")
+}

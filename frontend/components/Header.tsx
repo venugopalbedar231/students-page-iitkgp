@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const topNavLinks = [
   { label: "About", href: "https://www.iitkgp.ac.in/about-iitkgp" },
   { label: "Administration", href: "https://www.iitkgp.ac.in/navpage/administration" },
-  { label: "Students", href: "https://www.iitkgp.ac.in/navpage/student", isPill: true },
+  { label: "Students", href: "https://students.iitkgp.ac.in", isPill: true },
   { label: "Faculty and Staff", href: "https://www.iitkgp.ac.in/faculty-why-joining-iitkgp" },
   { label: "Visitors", href: "https://www.iitkgp.ac.in/how-to-reach" },
   { label: "Outreach and Alumni Affairs", href: "https://www.iitkgp.ac.in/navpage/outreach" },
@@ -34,13 +34,25 @@ export default function Header() {
   const [socialOpen, setSocialOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState("en");
 
+  // Prevent background scroll when mobile drawer is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
+
   return (
     <header className="sticky top-0 z-50 shadow-sm bg-white font-public-sans">
       {/* 1. Header Top Strip (.header-top-strip .orange-bg) */}
-      <div className="bg-[#db5903] text-white py-[6px]">
+      <div className="bg-[#db5903] text-white py-[6px] border-b border-white/20 xl:border-b-0">
         <div className="mx-auto max-w-[1320px] px-3 sm:px-4">
           <div className="flex items-center justify-between min-h-[44px]">
-            {/* Left: Desktop top navigation list (.primary-menu-links) */}
+            {/* Desktop Left: Top navigation list (.primary-menu-links) (>= xl) */}
             <nav className="hidden xl:flex items-center space-x-0 list-none m-0 p-0">
               {/* Home Icon */}
               <a
@@ -77,18 +89,39 @@ export default function Header() {
               })}
             </nav>
 
-            {/* Mobile Header Title (< xl) */}
-            <div className="xl:hidden flex items-center gap-2.5">
-              <a href="https://www.iitkgp.ac.in/home" className="text-white text-lg no-underline flex items-center">
-                <i className="fas fa-home text-[20px]" />
-              </a>
-              <span className="font-semibold text-sm sm:text-base text-white tracking-tight">
-                IIT Kharagpur
-              </span>
+            {/* Mobile Left: Language Select & Search Icon (< xl) */}
+            <div className="xl:hidden flex items-center gap-3">
+              {/* Language Select */}
+              <div className="relative flex items-center">
+                <select
+                  value={selectedLang}
+                  onChange={(e) => setSelectedLang(e.target.value)}
+                  className="bg-transparent text-white border-0 text-[15px] font-medium focus:outline-none cursor-pointer py-1 pr-4 appearance-none outline-none"
+                  aria-label="Change Language"
+                >
+                  <option value="en" className="text-gray-900 bg-white">
+                    English
+                  </option>
+                  <option value="hi" className="text-gray-900 bg-white">
+                    हिन्दी
+                  </option>
+                </select>
+                <i className="fas fa-chevron-down text-[11px] text-white absolute right-0 pointer-events-none" />
+              </div>
+
+              {/* Circular Search Button */}
+              <button
+                type="button"
+                onClick={() => setSearchOpen((v) => !v)}
+                title="Search"
+                className="w-[34px] h-[34px] aspect-square rounded-full bg-white text-[#db5903] flex items-center justify-center border-0 cursor-pointer hover:bg-gray-100 transition-colors shrink-0 shadow-sm"
+              >
+                <i className={`fas ${searchOpen ? "fa-xmark" : "fa-magnifying-glass"} text-[14px]`} />
+              </button>
             </div>
 
-            {/* Right Controls (.lang-fontSize-social-media) */}
-            <div className="flex items-center">
+            {/* Desktop Right Controls (>= xl) */}
+            <div className="hidden xl:flex items-center">
               <ul className="flex items-center m-0 p-0 list-none text-white">
                 {/* Social Dropdown Toggle */}
                 <li className="relative flex items-center">
@@ -120,7 +153,7 @@ export default function Header() {
                 </li>
 
                 {/* Vertical Separator 1 */}
-                <li className="border-l border-white/70 h-3.5 mx-1.5 hidden sm:block" />
+                <li className="border-l border-white/70 h-3.5 mx-1.5" />
 
                 {/* Language Select (.change_language) */}
                 <li className="relative flex items-center px-1">
@@ -140,7 +173,7 @@ export default function Header() {
                 </li>
 
                 {/* Vertical Separator 2 */}
-                <li className="border-l border-white/70 h-3.5 mx-1.5 hidden sm:block" />
+                <li className="border-l border-white/70 h-3.5 mx-1.5" />
 
                 {/* Search Button (.searchNada) */}
                 <li className="flex items-center px-1">
@@ -166,19 +199,23 @@ export default function Header() {
                     <i className="fa-solid fa-arrow-down text-[14px]" />
                   </button>
                 </li>
-
-                {/* Mobile Menu Toggle */}
-                <li className="xl:hidden flex items-center pl-2">
-                  <button
-                    type="button"
-                    onClick={() => setMobileOpen((v) => !v)}
-                    aria-label="Toggle navigation menu"
-                    className="w-9 h-9 flex items-center justify-center rounded bg-white/20 text-white hover:bg-white/30 transition-colors border-0 cursor-pointer"
-                  >
-                    <i className={`fas ${mobileOpen ? "fa-xmark" : "fa-bars"} text-[18px]`} />
-                  </button>
-                </li>
               </ul>
+            </div>
+
+            {/* Mobile Right: Hamburger / Close Toggle (< xl) */}
+            <div className="xl:hidden flex items-center">
+              <button
+                type="button"
+                onClick={() => setMobileOpen((v) => !v)}
+                aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
+                className="text-white hover:opacity-80 transition-opacity bg-transparent border-0 cursor-pointer p-1.5 flex items-center justify-center outline-none"
+              >
+                {mobileOpen ? (
+                  <i className="fas fa-xmark text-[28px] leading-none" />
+                ) : (
+                  <i className="fas fa-bars text-[24px] leading-none" />
+                )}
+              </button>
             </div>
           </div>
 
@@ -290,59 +327,63 @@ export default function Header() {
         </div>
       </div>
 
-      {/* 3. Mobile Responsive Drawer (< xl) */}
-      {mobileOpen && (
-        <div className="xl:hidden bg-white border-b border-gray-200 shadow-2xl max-h-[80vh] overflow-y-auto">
-          <nav className="mx-auto max-w-[1320px] px-5 py-4 divide-y divide-gray-100">
-            <div className="pb-3">
-              <p className="text-xs font-bold uppercase tracking-wider text-[#db5903] mb-2 font-public-sans">
-                Main Sections
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                {mainNavLinks.map((link) => (
+      {/* 3. Mobile Navigation Side Drawer Overlay (< xl) */}
+      <div
+        className={`xl:hidden fixed inset-0 top-[56px] z-50 flex transition-opacity duration-300 ${mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          }`}
+      >
+        {/* Left Orange Sidebar Menu Panel */}
+        <div
+          className={`w-[74%] sm:w-[65%] max-w-[320px] bg-[#db5903] h-full overflow-y-auto flex flex-col shadow-2xl transition-transform duration-300 ease-in-out ${mobileOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
+        >
+          {/* Home Icon Item */}
+          <div className="border-b border-white/20">
+            <a
+              href="https://www.iitkgp.ac.in/home"
+              title="Home"
+              onClick={() => setMobileOpen(false)}
+              className="py-3.5 px-5 text-white flex items-center hover:bg-black/10 transition-colors no-underline"
+            >
+              <i className="fas fa-home text-[22px] leading-none" />
+            </a>
+          </div>
+
+          {/* Menu Items */}
+          {topNavLinks.map((link) => {
+            if (link.isPill) {
+              return (
+                <div key={link.label} className="py-2.5 px-3 border-b border-white/20">
                   <a
-                    key={link.label}
                     href={link.href}
-                    className="block py-2.5 px-3 rounded-md text-base font-bold text-[#3D7BB7] hover:bg-orange-50 hover:text-[#db5903] no-underline transition-colors"
+                    onClick={() => setMobileOpen(false)}
+                    className="block w-full py-2 px-4 rounded-full bg-[#FDF781] text-[#FF000C] font-bold text-[15px] hover:bg-[#1B1B5C] hover:text-white transition-all text-left no-underline shadow-sm"
                   >
                     {link.label}
                   </a>
-                ))}
-              </div>
-            </div>
-
-            <div className="pt-3">
-              <p className="text-xs font-bold uppercase tracking-wider text-[#db5903] mb-2 font-public-sans">
-                Quick Links
-              </p>
-              <div className="flex flex-col gap-1">
+                </div>
+              );
+            }
+            return (
+              <div key={link.label} className="border-b border-white/20">
                 <a
-                  href="https://www.iitkgp.ac.in/home"
-                  className="py-2 px-3 rounded-md text-sm font-medium text-gray-800 hover:bg-orange-50 hover:text-[#db5903] no-underline"
+                  href={link.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="py-3.5 px-5 text-white font-bold text-[15px] hover:bg-black/10 transition-colors no-underline block text-left"
                 >
-                  Home
+                  {link.label}
                 </a>
-                {topNavLinks.map((link) => (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    className="py-2 px-3 rounded-md text-sm font-medium text-gray-800 hover:bg-orange-50 hover:text-[#db5903] no-underline flex items-center justify-between"
-                  >
-                    <span>{link.label}</span>
-                    {link.isPill && (
-                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#FDF781] text-[#FF000C]">
-                        Official
-                      </span>
-                    )}
-                  </a>
-                ))}
               </div>
-            </div>
-          </nav>
+            );
+          })}
         </div>
-      )}
+
+        {/* Right Backdrop Area (click outside to close) */}
+        <div
+          className="flex-1 bg-black/45 backdrop-blur-[2px] cursor-pointer"
+          onClick={() => setMobileOpen(false)}
+        />
+      </div>
     </header>
   );
 }
-
-

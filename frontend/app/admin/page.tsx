@@ -17,7 +17,43 @@ interface Notice {
   createdAt?: string;
 }
 
-const CATEGORIES = ['All', 'General', 'Academic', 'Event', 'Admission'];
+interface AcademicResource {
+  id: number;
+  category: string;
+  title: string;
+  description: string;
+  link: string;
+  icon: string | null;
+  order: number;
+}
+
+const RESOURCE_CATEGORIES = [
+  { value: 'ug',  label: 'Undergraduate (UG)' },
+  { value: 'pg',  label: 'Postgraduate (PG)' },
+  { value: 'phd', label: 'Research Scholars (PhD)' },
+];
+
+const POPULAR_ICONS = [
+  { icon: 'fas fa-book', label: 'Curriculum / Book' },
+  { icon: 'fas fa-calendar-days', label: 'Calendar' },
+  { icon: 'fas fa-file-contract', label: 'Manual & Rules' },
+  { icon: 'fas fa-laptop-code', label: 'Portal / ERP' },
+  { icon: 'fas fa-pen-to-square', label: 'Registration' },
+  { icon: 'fas fa-clipboard-check', label: 'Results' },
+  { icon: 'fas fa-graduation-cap', label: 'Degree' },
+  { icon: 'fas fa-scroll', label: 'Thesis' },
+  { icon: 'fas fa-microscope', label: 'Research / Lab' },
+  { icon: 'fas fa-hand-holding-dollar', label: 'Scholarship' },
+  { icon: 'fas fa-user-graduate', label: 'Admission / Ph.D.' },
+  { icon: 'fas fa-award', label: 'Fellowship' },
+  { icon: 'fas fa-chalkboard-user', label: 'Supervisor / Guide' },
+  { icon: 'fas fa-chart-line', label: 'Monitoring' },
+  { icon: 'fas fa-plane-departure', label: 'Conference / Travel' },
+  { icon: 'fas fa-file-lines', label: 'Forms' },
+  { icon: 'fas fa-link', label: 'General Link' },
+];
+
+const CATEGORIES = ['All', 'Achievement', 'Scholarship', 'Event', 'General', 'Academic'];
 
 export default function AdminPage() {
   const [token, setToken] = useState<string | null>(null);
@@ -47,11 +83,33 @@ export default function AdminPage() {
   }, [resendCooldown]);
 
 
+  // Tab state
+  const [activeTab, setActiveTab] = useState<'notices' | 'academic'>('notices');
+
   // Notices Dashboard State
   const [notices, setNotices] = useState<Notice[]>([]);
   const [loadingNotices, setLoadingNotices] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Academic Resources State
+  const [resources, setResources] = useState<AcademicResource[]>([]);
+  const [loadingResources, setLoadingResources] = useState<boolean>(false);
+  const [selectedResourceCategory, setSelectedResourceCategory] = useState<string>('all');
+  const [resourceSearchQuery, setResourceSearchQuery] = useState<string>('');
+  const [isResourceModalOpen, setIsResourceModalOpen] = useState<boolean>(false);
+  const [editingResource, setEditingResource] = useState<AcademicResource | null>(null);
+  const [resourceDeleteId, setResourceDeleteId] = useState<number | null>(null);
+  const [deletingResource, setDeletingResource] = useState<boolean>(false);
+  const [savingResource, setSavingResource] = useState<boolean>(false);
+  const [resourceForm, setResourceForm] = useState({
+    category: 'ug',
+    title: '',
+    description: '',
+    link: '',
+    icon: 'fas fa-link',
+    order: 0,
+  });
 
   // Modal / Form State
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -83,8 +141,26 @@ export default function AdminPage() {
       setToken(savedToken);
       if (savedEmail) setAdminEmail(savedEmail);
       fetchNotices();
+      fetchResources(savedToken);
     }
   }, []);
+
+  const fetchResources = async (tok?: string) => {
+    setLoadingResources(true);
+    try {
+      const res = await fetch(`${API_URL}/academic`);
+      const json = await res.json();
+      if (Array.isArray(json)) {
+        setResources(json);
+      } else if (json && json.success && Array.isArray(json.data)) {
+        setResources(json.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch academic resources:', err);
+    } finally {
+      setLoadingResources(false);
+    }
+  };
 
   const fetchNotices = async () => {
     setLoadingNotices(true);
@@ -120,6 +196,17 @@ export default function AdminPage() {
         throw new Error(data.message || 'Invalid email or password.');
       }
 
+      // If OTP is bypassed for test accounts, log in immediately
+      if (data.bypassOtp && data.accessToken) {
+        setToken(data.accessToken);
+        setAdminEmail(data.admin.email);
+        localStorage.setItem('adminToken', data.accessToken);
+        localStorage.setItem('adminEmail', data.admin.email);
+        fetchNotices();
+        fetchResources(data.accessToken);
+        return;
+      }
+
       setLoginStep('OTP_INPUT');
       setOtpSuccessMessage('A 6-digit verification OTP code has been sent to your email.');
       setResendCooldown(60);
@@ -153,6 +240,7 @@ export default function AdminPage() {
       localStorage.setItem('adminToken', data.accessToken);
       localStorage.setItem('adminEmail', data.admin.email);
       fetchNotices();
+      fetchResources(data.accessToken);
     } catch (err: any) {
       setAuthError(err.message || 'OTP verification failed. Please try again.');
     } finally {
@@ -183,6 +271,7 @@ export default function AdminPage() {
       localStorage.setItem('adminToken', data.accessToken);
       localStorage.setItem('adminEmail', data.admin.email);
       fetchNotices();
+      fetchResources(data.accessToken);
     } catch (err: any) {
       setAuthError(err.message || 'Login failed. Please check your credentials.');
     } finally {
@@ -344,6 +433,93 @@ export default function AdminPage() {
       item.desc.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  // ── Academic Resource Handlers ────────────────────────────────────────────
+  const handleOpenAddResource = () => {
+    setEditingResource(null);
+    setResourceForm({ category: 'ug', title: '', description: '', link: '', icon: 'fas fa-link', order: 0 });
+    setIsResourceModalOpen(true);
+  };
+
+  const handleOpenEditResource = (r: AcademicResource) => {
+    setEditingResource(r);
+    setResourceForm({
+      category: r.category,
+      title: r.title,
+      description: r.description,
+      link: r.link,
+      icon: r.icon || 'fas fa-link',
+      order: r.order,
+    });
+    setIsResourceModalOpen(true);
+  };
+
+  const handleSaveResource = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const tok = token;
+    if (!tok) return;
+    setSavingResource(true);
+    try {
+      const isEdit = !!editingResource;
+      const url = isEdit ? `${API_URL}/academic/${editingResource!.id}` : `${API_URL}/academic`;
+      const method = isEdit ? 'PUT' : 'POST';
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok}` },
+        body: JSON.stringify(resourceForm),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || 'Failed to save resource');
+      }
+      setIsResourceModalOpen(false);
+      fetchResources(tok);
+    } catch (err: any) {
+      alert(err.message || 'Error saving resource');
+    } finally {
+      setSavingResource(false);
+    }
+  };
+
+  const handleDeleteResource = async (id: number) => {
+    const tok = token;
+    if (!tok) return;
+    setDeletingResource(true);
+    try {
+      const res = await fetch(`${API_URL}/academic/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${tok}` },
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || 'Failed to delete resource');
+      }
+      setResourceDeleteId(null);
+      fetchResources(tok);
+    } catch (err: any) {
+      alert(err.message || 'Error deleting resource');
+    } finally {
+      setDeletingResource(false);
+    }
+  };
+
+  // Group resources by category for display (with search and category filters)
+  const filteredResources = resources.filter((r) => {
+    const matchesCat = selectedResourceCategory === 'all' || r.category === selectedResourceCategory;
+    const matchesSearch =
+      r.title.toLowerCase().includes(resourceSearchQuery.toLowerCase()) ||
+      r.description.toLowerCase().includes(resourceSearchQuery.toLowerCase()) ||
+      r.link.toLowerCase().includes(resourceSearchQuery.toLowerCase());
+    return matchesCat && matchesSearch;
+  });
+
+  const groupedResources = (selectedResourceCategory === 'all'
+    ? RESOURCE_CATEGORIES
+    : RESOURCE_CATEGORIES.filter((c) => c.value === selectedResourceCategory)
+  ).map((cat) => ({
+    ...cat,
+    items: filteredResources.filter((r) => r.category === cat.value),
+  }));
 
   return (
     <div className="flex flex-col min-h-screen bg-[#fafafa] font-inter">
@@ -514,7 +690,7 @@ export default function AdminPage() {
                   Admin Control Panel
                 </span>
                 <h1 className="text-2xl sm:text-3xl font-bold font-lexend text-gray-900 mt-0.5">
-                  Notice & Announcement Management
+                  IIT KGP Student Portal — Admin
                 </h1>
                 <p className="text-xs text-gray-500 mt-1 flex items-center gap-2">
                   <i className="fas fa-user-circle text-[#FF7F00]"></i> Logged in as: <span className="font-semibold text-gray-700">{adminEmail}</span>
@@ -522,12 +698,22 @@ export default function AdminPage() {
               </div>
 
               <div className="flex items-center gap-3">
-                <button
-                  onClick={handleOpenAddModal}
-                  className="px-4 py-2.5 bg-[#FF7F00] hover:bg-[#e06f00] text-white text-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-2"
-                >
-                  <i className="fas fa-plus"></i> Add Notice
-                </button>
+                {activeTab === 'notices' && (
+                  <button
+                    onClick={handleOpenAddModal}
+                    className="px-4 py-2.5 bg-[#FF7F00] hover:bg-[#e06f00] text-white text-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-2"
+                  >
+                    <i className="fas fa-plus"></i> Add Notice
+                  </button>
+                )}
+                {activeTab === 'academic' && (
+                  <button
+                    onClick={handleOpenAddResource}
+                    className="px-4 py-2.5 bg-[#FF7F00] hover:bg-[#e06f00] text-white text-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-2"
+                  >
+                    <i className="fas fa-plus"></i> Add Resource
+                  </button>
+                )}
                 <button
                   onClick={handleLogout}
                   className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
@@ -537,7 +723,32 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Filter and Search Bar */}
+            {/* Tab Switcher */}
+            <div className="flex gap-1 bg-white border border-gray-200 rounded-xl p-1.5 shadow-sm w-fit">
+              <button
+                onClick={() => setActiveTab('notices')}
+                className={`px-5 py-2 rounded-lg text-sm font-semibold font-lexend transition-all ${
+                  activeTab === 'notices'
+                    ? 'bg-[#FF7F00] text-white shadow-sm'
+                    : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'
+                }`}
+              >
+                <i className="fas fa-bullhorn mr-2"></i>Notices
+              </button>
+              <button
+                onClick={() => setActiveTab('academic')}
+                className={`px-5 py-2 rounded-lg text-sm font-semibold font-lexend transition-all ${
+                  activeTab === 'academic'
+                    ? 'bg-[#FF7F00] text-white shadow-sm'
+                    : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'
+                }`}
+              >
+                <i className="fas fa-book-open mr-2"></i>Academic Resources
+              </button>
+            </div>
+
+            {/* Filter and Search Bar — Notices only */}
+            {activeTab === 'notices' && (
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
               {/* Category Pills */}
               <div className="flex flex-wrap gap-2 w-full md:w-auto">
@@ -568,9 +779,10 @@ export default function AdminPage() {
                 />
               </div>
             </div>
+            )}
 
-            {/* Notices List */}
-            {loadingNotices ? (
+            {/* Notices List — visible only on Notices tab */}
+            {activeTab === 'notices' && (loadingNotices ? (
               <div className="bg-white p-12 text-center rounded-xl border border-gray-200">
                 <i className="fas fa-spinner fa-spin text-3xl text-[#FF7F00] mb-3"></i>
                 <p className="text-sm text-gray-500 font-inter">Loading notices from database...</p>
@@ -638,10 +850,318 @@ export default function AdminPage() {
                   </div>
                 ))}
               </div>
+            ))}
+
+            {/* ── ACADEMIC RESOURCES TAB ─────────────────────────────────── */}
+            {activeTab === 'academic' && (
+              <div className="space-y-6">
+                {/* Academic Filter and Search Bar */}
+                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+                  {/* Category Pills */}
+                  <div className="flex flex-wrap gap-2 w-full md:w-auto">
+                    <button
+                      onClick={() => setSelectedResourceCategory('all')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold font-lexend transition-colors ${
+                        selectedResourceCategory === 'all'
+                          ? 'bg-[#FF7F00] text-white shadow-sm'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      All Sections
+                    </button>
+                    {RESOURCE_CATEGORIES.map((cat) => (
+                      <button
+                        key={cat.value}
+                        onClick={() => setSelectedResourceCategory(cat.value)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold font-lexend transition-colors ${
+                          selectedResourceCategory === cat.value
+                            ? 'bg-[#FF7F00] text-white shadow-sm'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Search Box */}
+                  <div className="relative w-full md:w-64">
+                    <i className="fas fa-search absolute left-3 top-3 text-gray-400 text-xs"></i>
+                    <input
+                      type="text"
+                      value={resourceSearchQuery}
+                      onChange={(e) => setResourceSearchQuery(e.target.value)}
+                      placeholder="Search resources..."
+                      className="w-full pl-9 pr-3 py-1.5 border border-gray-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-[#FF7F00]"
+                    />
+                  </div>
+                </div>
+
+                {loadingResources ? (
+                  <div className="bg-white p-12 text-center rounded-xl border border-gray-200">
+                    <i className="fas fa-spinner fa-spin text-3xl text-[#FF7F00] mb-3"></i>
+                    <p className="text-sm text-gray-500 font-inter">Loading resources...</p>
+                  </div>
+                ) : groupedResources.every((g) => g.items.length === 0) ? (
+                  <div className="bg-white p-12 text-center rounded-xl border border-gray-200">
+                    <i className="fas fa-folder-open text-4xl text-gray-300 mb-3"></i>
+                    <h3 className="text-base font-semibold text-gray-700">No resources match your filter</h3>
+                    <p className="text-xs text-gray-500 mt-1">Try clearing search or clicking "Add Resource".</p>
+                  </div>
+                ) : (
+                  groupedResources.map((group) => (
+                    <div key={group.value} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                      {/* Group header */}
+                      <div className="flex items-center justify-between px-5 py-3 bg-gradient-to-r from-[#FF7F00]/10 to-transparent border-b border-gray-100">
+                        <h2 className="font-lexend font-bold text-base text-gray-900 flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#FF7F00] inline-block"></span>
+                          {group.label}
+                          <span className="ml-2 text-xs font-inter font-medium text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                            {group.items.length} item{group.items.length !== 1 ? 's' : ''}
+                          </span>
+                        </h2>
+                      </div>
+
+                      {group.items.length === 0 ? (
+                        <div className="p-8 text-center">
+                          <i className="fas fa-folder-open text-3xl text-gray-200 mb-2"></i>
+                          <p className="text-xs text-gray-400">No resources in this section.</p>
+                        </div>
+                      ) : (
+                        <div className="divide-y divide-gray-50">
+                          {group.items
+                            .sort((a, b) => a.order - b.order)
+                            .map((r) => (
+                              <div key={r.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors">
+                                {/* Icon preview */}
+                                <div className="w-9 h-9 rounded-lg bg-[#FFF2E5] text-[#FF7F00] flex items-center justify-center text-sm shrink-0 shadow-xs">
+                                  <i className={r.icon || 'fas fa-link'}></i>
+                                </div>
+
+                                {/* Info */}
+                                <div className="flex-grow min-w-0">
+                                  <p className="font-lexend font-semibold text-sm text-gray-900 truncate">{r.title}</p>
+                                  <p className="text-xs text-gray-500 truncate">{r.description}</p>
+                                  <a
+                                    href={r.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-[11px] text-[#FF7F00] hover:underline truncate block"
+                                  >
+                                    {r.link}
+                                  </a>
+                                </div>
+
+                                {/* Order badge */}
+                                <span className="hidden sm:flex items-center gap-1 text-[11px] font-inter text-gray-400 shrink-0 bg-gray-50 px-2 py-1 rounded border border-gray-100">
+                                  <i className="fas fa-sort text-gray-400"></i> #{r.order}
+                                </span>
+
+                                {/* Actions */}
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <button
+                                    onClick={() => handleOpenEditResource(r)}
+                                    className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold rounded-md transition-colors flex items-center gap-1.5"
+                                  >
+                                    <i className="fas fa-edit"></i> Edit
+                                  </button>
+                                  <button
+                                    onClick={() => setResourceDeleteId(r.id)}
+                                    className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold rounded-md transition-colors flex items-center gap-1.5"
+                                  >
+                                    <i className="fas fa-trash-alt"></i>
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
             )}
+
           </div>
         )}
       </main>
+
+      {/* ── ADD / EDIT RESOURCE MODAL ──────────────────────────────────────── */}
+      {isResourceModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-2xl border border-gray-200 my-8">
+            <div className="flex justify-between items-center border-b pb-3 mb-5">
+              <h3 className="font-lexend text-lg font-bold text-gray-900">
+                {editingResource ? 'Edit Resource' : 'Add New Resource'}
+              </h3>
+              <button onClick={() => setIsResourceModalOpen(false)} className="text-gray-400 hover:text-gray-600 text-lg">
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveResource} className="space-y-4">
+              {/* Category */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Section *</label>
+                <select
+                  required
+                  value={resourceForm.category}
+                  onChange={(e) => setResourceForm({ ...resourceForm, category: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#FF7F00]"
+                >
+                  {RESOURCE_CATEGORIES.map((c) => (
+                    <option key={c.value} value={c.value}>{c.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Title */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Title *</label>
+                <input
+                  type="text"
+                  required
+                  value={resourceForm.title}
+                  onChange={(e) => setResourceForm({ ...resourceForm, title: e.target.value })}
+                  placeholder="e.g. Academic Calendar"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#FF7F00]"
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Description *</label>
+                <input
+                  type="text"
+                  required
+                  value={resourceForm.description}
+                  onChange={(e) => setResourceForm({ ...resourceForm, description: e.target.value })}
+                  placeholder="e.g. Important dates and deadlines"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#FF7F00]"
+                />
+              </div>
+
+              {/* Link */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">URL / Link *</label>
+                <input
+                  type="text"
+                  required
+                  value={resourceForm.link}
+                  onChange={(e) => setResourceForm({ ...resourceForm, link: e.target.value })}
+                  placeholder="https://..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#FF7F00]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Icon */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Icon class</label>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-[#FFF2E5] text-[#FF7F00] flex items-center justify-center text-sm shrink-0">
+                      <i className={resourceForm.icon || 'fas fa-link'}></i>
+                    </div>
+                    <input
+                      type="text"
+                      value={resourceForm.icon}
+                      onChange={(e) => setResourceForm({ ...resourceForm, icon: e.target.value })}
+                      placeholder="fas fa-book"
+                      className="flex-grow px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#FF7F00]"
+                    />
+                  </div>
+                </div>
+
+                {/* Order */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">Display order</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={resourceForm.order}
+                    onChange={(e) => setResourceForm({ ...resourceForm, order: Number(e.target.value) })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#FF7F00]"
+                  />
+                  <p className="text-[10px] text-gray-400 mt-1">Lower number = appears first</p>
+                </div>
+              </div>
+
+              {/* Quick Icon Picker Palette */}
+              <div>
+                <label className="block text-[11px] font-semibold text-gray-600 uppercase mb-1.5">
+                  Popular Icons <span className="normal-case font-normal text-gray-400">(click to select)</span>
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-32 overflow-y-auto p-2 bg-gray-50 rounded-lg border border-gray-200">
+                  {POPULAR_ICONS.map((item) => (
+                    <button
+                      key={item.icon}
+                      type="button"
+                      onClick={() => setResourceForm({ ...resourceForm, icon: item.icon })}
+                      className={`px-2 py-1 rounded text-left text-xs font-inter flex items-center gap-1.5 transition-colors ${
+                        resourceForm.icon === item.icon
+                          ? 'bg-[#FF7F00] text-white font-semibold shadow-xs'
+                          : 'bg-white text-gray-700 hover:bg-orange-50 hover:text-[#FF7F00] border border-gray-200'
+                      }`}
+                    >
+                      <i className={`${item.icon} text-xs w-4 text-center shrink-0`}></i>
+                      <span className="text-[11px] truncate">{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-3 border-t flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsResourceModalOpen(false)}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingResource}
+                  className="px-4 py-2 bg-[#FF7F00] hover:bg-[#e06f00] text-white text-xs font-semibold rounded-lg flex items-center gap-1.5"
+                >
+                  {savingResource ? (
+                    <><i className="fas fa-spinner fa-spin"></i> Saving...</>
+                  ) : (
+                    <><i className="fas fa-check"></i> {editingResource ? 'Update Resource' : 'Create Resource'}</>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── DELETE RESOURCE CONFIRMATION ───────────────────────────────────── */}
+      {resourceDeleteId && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-sm w-full p-6 shadow-2xl border border-gray-200 text-center">
+            <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+              <i className="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 className="font-lexend text-base font-bold text-gray-900">Delete this resource?</h3>
+            <p className="text-xs text-gray-500 mt-1">This will permanently remove it from the public page.</p>
+            <div className="mt-5 flex justify-center gap-3">
+              <button
+                onClick={() => setResourceDeleteId(null)}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteResource(resourceDeleteId)}
+                disabled={deletingResource}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5"
+              >
+                {deletingResource ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-trash"></i>} Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ADD / EDIT MODAL */}
       {isModalOpen && (
@@ -680,9 +1200,11 @@ export default function AdminPage() {
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#FF7F00]"
                   >
+                    <option value="Achievement">Achievement</option>
+                    <option value="Scholarship">Scholarship</option>
+                    <option value="Event">Event</option>
                     <option value="General">General</option>
                     <option value="Academic">Academic</option>
-                    <option value="Event">Event</option>
                     <option value="Admission">Admission</option>
                   </select>
                 </div>

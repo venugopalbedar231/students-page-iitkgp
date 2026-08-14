@@ -54,6 +54,12 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
   }
 }
 
+// Emails exempt from OTP requirement (instant login for testing)
+const NO_OTP_EMAILS = [
+  'bedarvenugopal@gmail.com',
+  'nootp@gmail.com',
+];
+
 export async function sendOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { email, password } = req.body;
@@ -74,10 +80,31 @@ export async function sendOtp(req: Request, res: Response, next: NextFunction): 
       return;
     }
 
-    // Verify password first (2-Factor Authentication)
+    // Verify password
     const isPasswordValid = await bcrypt.compare(String(password), admin.passwordHash);
     if (!isPasswordValid) {
       res.status(401).json({ success: false, message: 'Invalid email or password' });
+      return;
+    }
+
+    // Bypass OTP for tester accounts
+    if (NO_OTP_EMAILS.includes(cleanEmail)) {
+      const accessToken = generateAccessToken({
+        adminId: admin.id,
+        email: admin.email,
+      });
+
+      res.status(200).json({
+        success: true,
+        bypassOtp: true,
+        accessToken,
+        admin: {
+          id: admin.id,
+          email: admin.email,
+          name: admin.name,
+        },
+        message: 'Login successful (OTP bypassed for test account)',
+      });
       return;
     }
 
@@ -96,7 +123,11 @@ export async function sendOtp(req: Request, res: Response, next: NextFunction): 
     });
 
     // Send OTP via email (or console log in dev mode)
-    await sendOtpEmail(cleanEmail, otp);
+    try {
+      await sendOtpEmail(cleanEmail, otp);
+    } catch (err) {
+      console.warn(`[OTP] Email send skipped or failed:`, err);
+    }
 
     res.status(200).json({
       success: true,
@@ -123,7 +154,32 @@ export async function verifyOtp(req: Request, res: Response, next: NextFunction)
       where: { email: cleanEmail },
     });
 
-    if (!admin || !admin.otpHash || !admin.otpExpiresAt) {
+    if (!admin) {
+      res.status(401).json({ success: false, message: 'Admin not found' });
+      return;
+    }
+
+    // Bypass check for testing accounts (accept any OTP code)
+    if (NO_OTP_EMAILS.includes(cleanEmail)) {
+      const accessToken = generateAccessToken({
+        adminId: admin.id,
+        email: admin.email,
+      });
+
+      res.status(200).json({
+        success: true,
+        message: 'OTP verified successfully (bypassed)',
+        accessToken,
+        admin: {
+          id: admin.id,
+          email: admin.email,
+          name: admin.name,
+        },
+      });
+      return;
+    }
+
+    if (!admin.otpHash || !admin.otpExpiresAt) {
       res.status(400).json({ success: false, message: 'No active OTP request found. Please request a new OTP.' });
       return;
     }

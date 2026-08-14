@@ -1,43 +1,79 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import NewsSidebar from "@/components/NewsSidebar";
-import ResourceCategory from "@/components/ResourceCategory";
+import AcademicSections, {
+  fallbackUgLinks,
+  fallbackPgLinks,
+  fallbackPhdLinks,
+  LinkItem,
+  ApiResource,
+} from "@/components/AcademicSections";
 import UGGuidelines from "@/components/UGGuidelines";
 import Scholarships from "@/components/Scholarships";
 import EmergencyContacts from "@/components/EmergencyContacts";
 import ExtraCurricular from "@/components/ExtraCurricular";
 import CampusMap from "@/components/CampusMap";
-
 import HeroVideo from "@/components/HeroVideo";
 
-const ugLinks = [
-  { title: "Curriculum", icon: "fas fa-book", url: "https://www.iitkgp.ac.in/curricula-ug", desc: "View semester-wise course structures" },
-  { title: "Academic Calendar", icon: "fas fa-calendar-days", url: "https://www.iitkgp.ac.in/academic-calendar-ug", desc: "Important dates and deadlines" },
-  { title: "UG Manual & Regulations", icon: "fas fa-file-contract", url: "https://www.iitkgp.ac.in/assets/pdf/UG_Manual.pdf", desc: "Official student guide & policies" },
-  { title: "ERP Portal", icon: "fas fa-laptop-code", url: "https://erp.iitkgp.ac.in", desc: "View the new ERP Portal" },
-  { title: "Course Registration", icon: "fas fa-pen-to-square", url: "https://erp.iitkgp.ac.in", desc: "View semester-registration" },
-  { title: "Examinations & Results", icon: "fas fa-clipboard-check", url: "https://erp.iitkgp.ac.in", desc: "View examinations & results" },
-];
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-const pgLinks = [
-  { title: "M.Tech Curriculum", icon: "fas fa-graduation-cap", url: "https://www.iitkgp.ac.in/curricula-pg", desc: "View M.Tech & MS curriculum" },
-  { title: "Thesis Guidelines", icon: "fas fa-scroll", url: "#", desc: "Submission norms and formats" },
-  { title: "Research Facilities", icon: "fas fa-microscope", url: "https://www.iitkgp.ac.in/navpage/research", desc: "Labs and central facilities" },
-  { title: "Funding Opportunities", icon: "fas fa-hand-holding-dollar", url: "https://www.iitkgp.ac.in/scholarships", desc: "Scholarships and assistantships" },
-  { title: "Ph.D. Admission", icon: "fas fa-user-graduate", url: "https://www.iitkgp.ac.in/phd-admission", desc: "Admission calendar for Ph.D." },
-  { title: "PG Academic Calendar", icon: "fas fa-calendar-days", url: "#", desc: "Important dates and deadlines" },
-];
+function normalizeCategory(raw: string): "ug" | "pg" | "phd" | null {
+  const cat = raw.toLowerCase().trim();
+  if (cat === "ug" || cat === "undergraduate" || cat.includes("undergrad")) return "ug";
+  if (cat === "pg" || cat === "postgraduate" || cat.includes("postgrad") || cat.includes("mtech") || cat.includes("ms")) return "pg";
+  if (cat === "phd" || cat === "rs" || cat === "research" || cat.includes("scholar") || cat.includes("doctoral")) return "phd";
+  return null;
+}
 
-const phdLinks = [
-  { title: "Doctoral Research Manual", icon: "fas fa-book", url: "#", desc: "View doctoral research manual" },
-  { title: "Guide Allocation", icon: "fas fa-chalkboard-user", url: "#", desc: "Supervisor allocation process" },
-  { title: "Progress Monitoring", icon: "fas fa-chart-line", url: "#", desc: "Track research progress" },
-  { title: "Conference Support", icon: "fas fa-plane-departure", url: "#", desc: "Travel grants and support" },
-  { title: "Fellowship Information", icon: "fas fa-award", url: "https://www.iitkgp.ac.in/scholarships", desc: "Fellowship information" },
-  { title: "Important Forms", icon: "fas fa-file-lines", url: "#", desc: "Downloadable forms" },
-];
+async function fetchAcademicResources(): Promise<ApiResource[]> {
+  const apiUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  try {
+    const res = await fetch(`${apiUrl}/academic`, { cache: "no-store" });
+    if (!res.ok) return [];
+    const json = await res.json();
+    if (Array.isArray(json)) return json;
+    if (json && json.success && Array.isArray(json.data)) return json.data;
+    return [];
+  } catch {
+    return [];
+  }
+}
 
-export default function Home() {
+export default async function Home() {
+  const apiResources = await fetchAcademicResources();
+
+  // Group resources by normalized category key
+  const grouped: Record<"ug" | "pg" | "phd", LinkItem[]> = {
+    ug: [],
+    pg: [],
+    phd: [],
+  };
+
+  for (const r of apiResources) {
+    const cat = normalizeCategory(r.category);
+    if (cat) {
+      grouped[cat].push({
+        id: r.id,
+        title: r.title,
+        icon: r.icon || "fas fa-link",
+        url: r.link,
+        desc: r.description,
+        order: r.order ?? 0,
+      });
+    }
+  }
+
+  const sortByOrder = (a: LinkItem, b: LinkItem) => {
+    const orderDiff = (a.order ?? 0) - (b.order ?? 0);
+    if (orderDiff !== 0) return orderDiff;
+    return (a.id ?? 0) - (b.id ?? 0);
+  };
+
+  const ugLinks = grouped.ug.length > 0 ? grouped.ug.sort(sortByOrder) : fallbackUgLinks;
+  const pgLinks = grouped.pg.length > 0 ? grouped.pg.sort(sortByOrder) : fallbackPgLinks;
+  const phdLinks = grouped.phd.length > 0 ? grouped.phd.sort(sortByOrder) : fallbackPhdLinks;
+
   return (
     <div className="flex flex-col min-h-screen bg-[#fafafa]">
       <Header />
@@ -76,9 +112,11 @@ export default function Home() {
             
             {/* Left Content Area (Resources + Map) */}
             <div className="w-full md:w-2/3 lg:w-3/4 flex flex-col">
-              <ResourceCategory title="Undergraduate (UG)" links={ugLinks} defaultOpen={true} />
-              <ResourceCategory title="Postgraduate (PG)" links={pgLinks} defaultOpen={false} />
-              <ResourceCategory title="Research Scholars" links={phdLinks} defaultOpen={false} />
+              <AcademicSections
+                initialUg={ugLinks}
+                initialPg={pgLinks}
+                initialPhd={phdLinks}
+              />
 
               <UGGuidelines />
 
