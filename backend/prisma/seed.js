@@ -9,55 +9,6 @@ const prisma = new client_1.PrismaClient();
 
 async function main() {
     console.log('Seeding database...');
-    const accounts = [
-        {
-            email: 'parammhta444@gmail.com',
-            name: 'Param (IIT KGP Admin)',
-            password: 'admin123',
-        },
-        {
-            email: 'admin@iitkgp.ac.in',
-            name: 'IIT KGP Admin',
-            password: 'admin123',
-        },
-        {
-            email: 'bedarvenugopal@gmail.com',
-            name: 'Venu Gopal',
-            password: 'password',
-        },
-        {
-            email: 'nootp@gmail.com',
-            name: 'No OTP',
-            password: 'nootp',
-        },
-    ];
-
-    for (const acc of accounts) {
-        const passwordHash = await bcryptjs_1.default.hash(acc.password, 10);
-        const existingAdmin = await prisma.admin.findUnique({
-            where: { email: acc.email },
-        });
-        if (!existingAdmin) {
-            await prisma.admin.create({
-                data: {
-                    email: acc.email,
-                    name: acc.name,
-                    passwordHash,
-                },
-            });
-            console.log(`Created admin account: ${acc.email}`);
-        }
-        else {
-            await prisma.admin.update({
-                where: { email: acc.email },
-                data: {
-                    name: acc.name,
-                    passwordHash,
-                },
-            });
-            console.log(`Updated credentials for admin account: ${acc.email}`);
-        }
-    }
 
     // Seed Initial Notices if empty
     const initialNotices = [
