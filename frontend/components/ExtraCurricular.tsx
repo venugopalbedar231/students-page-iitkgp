@@ -13,24 +13,28 @@ const flagship = [
     kicker: "Techno-management fest",
     blurb: "Asia's largest techno-management festival, run entirely by students — competitions, exhibitions and guest lectures.",
     icon: "fas fa-microchip",
+    image: "/fests/kshitij.jpeg",
   },
   {
     title: "Spring Fest",
     kicker: "Socio-cultural fest",
     blurb: "The annual social and cultural festival, drawing performers and competitors from across the country.",
     icon: "fas fa-star",
+    image: "/fests/spring-fest.jpeg",
   },
   {
     title: "Shaurya",
     kicker: "Sports fest",
     blurb: "The annual sports festival bringing together top athletic talent across colleges.",
     icon: "fas fa-trophy",
+    image: "/fests/shaurya.jpeg",
   },
   {
     title: "Wellbeing Day",
     kicker: "Campus wellness fest",
     blurb: "A campus-wide festival promoting student health, mindfulness, and holistic well-being.",
     icon: "fas fa-heart-pulse",
+    image: "/fests/wellbeing-day.jpeg",
   },
 ];
 
@@ -83,26 +87,39 @@ export default function ExtraCurricular() {
           <div className="p-4 md:p-5 bg-[#fafafa] flex flex-col gap-5">
 
             {/* CTA */}
-            <div className="relative overflow-hidden rounded-xl bg-white border border-[#FF7F00]/30 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="relative">
-                <p className="font-lexend font-semibold text-gray-900 text-base m-0 mb-1">
-                  There&apos;s far more than fits on this page
-                </p>
-                <p className="text-sm text-gray-500 font-inter leading-relaxed m-0 max-w-xl">
-                  Robotics, dramatics, music, debating, photography, social work — the societies, the inter-hall
-                  circuit and every fixture are coordinated by the Technology Students&apos; Gymkhana. Their site is
-                  where the current list lives.
-                </p>
+            <div className="relative overflow-hidden rounded-xl bg-gray-900 border border-[#FF7F00]/40 shadow-md group min-h-[260px] sm:min-h-[280px] flex flex-col justify-end p-5 sm:p-6">
+              {/* Background Image - anchored to top so the building is fully visible */}
+              <img
+                src="/tsg.jpg"
+                alt="Technology Students' Gymkhana (TSG)"
+                className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+              />
+
+              {/* Gradient Overlay - dark at bottom for text contrast, clear at top to reveal the building */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/70 via-55% to-transparent" />
+
+              {/* Text content overlaid on top */}
+              <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-12">
+                <div className="relative">
+                  <p className="font-lexend font-bold text-white text-base sm:text-lg m-0 mb-1 leading-tight drop-shadow-md">
+                    There&apos;s far more than fits on this page
+                  </p>
+                  <p className="text-sm text-gray-200 font-inter leading-relaxed m-0 max-w-xl drop-shadow-md">
+                    Robotics, dramatics, music, debating, photography, social work — the societies, the inter-hall
+                    circuit and every fixture are coordinated by the Technology Students&apos; Gymkhana. Their site is
+                    where the current list lives.
+                  </p>
+                </div>
+                <a
+                  href="https://gymkhana.iitkgp.ac.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="shrink-0 inline-flex items-center justify-center gap-2 max-md:min-h-11 bg-[#FF7F00] text-white font-inter font-semibold text-sm px-5 py-2.5 rounded-full no-underline shadow-md hover:bg-[#e06f00] hover:scale-[1.02] active:scale-[0.98] transition-all"
+                >
+                  Explore TSG
+                  <i className="fas fa-arrow-up-right-from-square text-xs"></i>
+                </a>
               </div>
-              <a
-                href="https://gymkhana.iitkgp.ac.in"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="shrink-0 inline-flex items-center justify-center gap-2 max-md:min-h-11 bg-[#FF7F00] text-white font-inter font-semibold text-sm px-5 py-2.5 rounded-full no-underline shadow-sm hover:bg-[#e06f00] transition-colors"
-              >
-                Explore TSG
-                <i className="fas fa-arrow-up-right-from-square text-xs"></i>
-              </a>
             </div>
 
             <p className="text-sm sm:text-base text-gray-600 font-inter leading-relaxed m-0 pl-2 md:pl-3 max-w-3xl">
@@ -115,19 +132,38 @@ export default function ExtraCurricular() {
               {flagship.map((f) => (
                 <div
                   key={f.title}
-                  className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#FF7F00] to-[#ff9e3d] p-5 shadow-md"
+                  className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden flex flex-col group transition-all duration-300 hover:shadow-md"
                 >
-                  <i className={`${f.icon} absolute -right-3 -bottom-3 text-white/15 text-7xl pointer-events-none`}></i>
-                  <div className="relative">
-                    <span className="text-xs font-inter font-semibold uppercase tracking-[0.15em] text-white/90">
-                      {f.kicker}
-                    </span>
-                    <h4 className="font-lexend font-bold text-2xl text-white mt-1 mb-2 leading-tight">{f.title}</h4>
-                    <p className="text-sm text-white/90 font-inter leading-relaxed m-0 max-w-md">{f.blurb}</p>
-                    <span className="inline-flex items-center gap-1.5 mt-3 text-xs font-inter font-semibold text-white/90 bg-white/20 px-3 py-1 rounded-full">
-                      <i className="fas fa-calendar text-[11px]"></i>
-                      Dates to be announced
-                    </span>
+                  {f.image && (
+                    <div className="relative h-44 sm:h-48 overflow-hidden bg-gray-100 shrink-0">
+                      <img
+                        src={f.image}
+                        alt={f.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white text-xs">
+                        <i className={f.icon}></i>
+                      </div>
+                    </div>
+                  )}
+                  <div className="p-4 sm:p-5 flex flex-col justify-between flex-1">
+                    <div>
+                      <span className="text-xs font-inter font-semibold uppercase tracking-wider text-[#FF7F00]">
+                        {f.kicker}
+                      </span>
+                      <h4 className="font-lexend font-bold text-xl text-gray-900 mt-1 mb-2 leading-tight">
+                        {f.title}
+                      </h4>
+                      <p className="text-sm text-gray-600 font-inter leading-relaxed m-0">
+                        {f.blurb}
+                      </p>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-inter font-medium text-gray-500 bg-gray-50 px-2.5 py-1 rounded-full border border-gray-200/60">
+                        <i className="fas fa-calendar text-[11px] text-[#FF7F00]"></i>
+                        Dates to be announced
+                      </span>
+                    </div>
                   </div>
                 </div>
               ))}
