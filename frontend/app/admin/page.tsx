@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { getApiUrl } from '@/lib/api';
 
 interface Notice {
   id: number;
@@ -132,7 +133,7 @@ export default function AdminPage() {
   const [imageUploading, setImageUploading] = useState<boolean>(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  const API_URL = getApiUrl();
 
   useEffect(() => {
     const savedToken = localStorage.getItem('adminToken');

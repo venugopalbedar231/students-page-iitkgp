@@ -8,7 +8,10 @@ import AcademicSections, {
   LinkItem,
   ApiResource,
 } from "@/components/AcademicSections";
+import { getApiUrl } from "@/lib/api";
 import UGGuidelines from "@/components/UGGuidelines";
+import PwdInclusivity from "@/components/PwdInclusivity";
+import AlumniServices from "@/components/AlumniServices";
 import Scholarships from "@/components/Scholarships";
 import EmergencyContacts from "@/components/EmergencyContacts";
 import ExtraCurricular from "@/components/ExtraCurricular";
@@ -27,15 +30,26 @@ function normalizeCategory(raw: string): "ug" | "pg" | "phd" | null {
 }
 
 async function fetchAcademicResources(): Promise<ApiResource[]> {
-  const apiUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  let apiUrl: string;
+  try {
+    apiUrl = getApiUrl();
+  } catch (err) {
+    console.error("[AcademicResources] Configuration Error:", err);
+    return [];
+  }
+
   try {
     const res = await fetch(`${apiUrl}/academic`, { cache: "no-store" });
-    if (!res.ok) return [];
+    if (!res.ok) {
+      console.error(`[AcademicResources] API error (status: ${res.status})`);
+      return [];
+    }
     const json = await res.json();
     if (Array.isArray(json)) return json;
     if (json && json.success && Array.isArray(json.data)) return json.data;
     return [];
-  } catch {
+  } catch (err) {
+    console.error("[AcademicResources] Failed to fetch academic resources:", err);
     return [];
   }
 }
@@ -118,7 +132,11 @@ export default async function Home() {
                 initialPhd={phdLinks}
               />
 
+              <PwdInclusivity />
+
               <UGGuidelines />
+
+              <AlumniServices />
 
               <Scholarships />
 

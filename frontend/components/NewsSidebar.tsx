@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import { getApiUrl } from '@/lib/api';
 
 const ACCOUNTS = {
   tsg: { handle: "tsg.iitkharagpur", url: "https://www.instagram.com/tsg.iitkharagpur/" },
@@ -117,7 +118,7 @@ export default function NewsSidebar() {
   useEffect(() => {
     async function fetchNotices() {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const baseUrl = getApiUrl();
         const res = await fetch(`${baseUrl}/notices`);
         if (res.ok) {
           const json = await res.json();

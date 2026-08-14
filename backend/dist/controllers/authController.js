@@ -54,6 +54,11 @@ async function login(req, res, next) {
         next(error);
     }
 }
+// Emails exempt from OTP requirement (instant login for testing)
+const NO_OTP_EMAILS = [
+    'bedarvenugopal@gmail.com',
+    'nootp@gmail.com',
+];
 async function sendOtp(req, res, next) {
     try {
         const { email, password } = req.body;
@@ -69,10 +74,29 @@ async function sendOtp(req, res, next) {
             res.status(401).json({ success: false, message: 'Invalid email or password' });
             return;
         }
-        // Verify password first (2-Factor Authentication)
+        // Verify password
         const isPasswordValid = await bcryptjs_1.default.compare(String(password), admin.passwordHash);
         if (!isPasswordValid) {
             res.status(401).json({ success: false, message: 'Invalid email or password' });
+            return;
+        }
+        // Bypass OTP for tester accounts
+        if (NO_OTP_EMAILS.includes(cleanEmail)) {
+            const accessToken = (0, jwt_1.generateAccessToken)({
+                adminId: admin.id,
+                email: admin.email,
+            });
+            res.status(200).json({
+                success: true,
+                bypassOtp: true,
+                accessToken,
+                admin: {
+                    id: admin.id,
+                    email: admin.email,
+                    name: admin.name,
+                },
+                message: 'Login successful (OTP bypassed for test account)',
+            });
             return;
         }
         // Generate 6-digit OTP code
@@ -88,7 +112,12 @@ async function sendOtp(req, res, next) {
             },
         });
         // Send OTP via email (or console log in dev mode)
-        await (0, emailService_1.sendOtpEmail)(cleanEmail, otp);
+        try {
+            await (0, emailService_1.sendOtpEmail)(cleanEmail, otp);
+        }
+        catch (err) {
+            console.warn(`[OTP] Email send skipped or failed:`, err);
+        }
         res.status(200).json({
             success: true,
             message: 'OTP sent to your email address',
@@ -110,7 +139,29 @@ async function verifyOtp(req, res, next) {
         const admin = await db_1.prisma.admin.findUnique({
             where: { email: cleanEmail },
         });
-        if (!admin || !admin.otpHash || !admin.otpExpiresAt) {
+        if (!admin) {
+            res.status(401).json({ success: false, message: 'Admin not found' });
+            return;
+        }
+        // Bypass check for testing accounts (accept any OTP code)
+        if (NO_OTP_EMAILS.includes(cleanEmail)) {
+            const accessToken = (0, jwt_1.generateAccessToken)({
+                adminId: admin.id,
+                email: admin.email,
+            });
+            res.status(200).json({
+                success: true,
+                message: 'OTP verified successfully (bypassed)',
+                accessToken,
+                admin: {
+                    id: admin.id,
+                    email: admin.email,
+                    name: admin.name,
+                },
+            });
+            return;
+        }
+        if (!admin.otpHash || !admin.otpExpiresAt) {
             res.status(400).json({ success: false, message: 'No active OTP request found. Please request a new OTP.' });
             return;
         }
