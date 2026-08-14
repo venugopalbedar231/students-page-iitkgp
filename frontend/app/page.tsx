@@ -72,7 +72,7 @@ export default function Home() {
         </div>
 
         <div className="mx-auto max-w-7xl px-4 py-6 md:py-8">
-          <div className="flex flex-col md:flex-row gap-6 lg:gap-8">
+          <div className="flex flex-col md:flex-row gap-6 lg:gap-8 items-start">
             
             {/* Left Content Area (Resources + Map) */}
             <div className="w-full md:w-2/3 lg:w-3/4 flex flex-col">
@@ -92,10 +92,8 @@ export default function Home() {
             </div>
 
             {/* Right Sidebar Area (News) */}
-            <div className="hidden md:block w-full md:w-1/3 lg:w-1/4">
-              <div className="h-full">
-                <NewsSidebar />
-              </div>
+            <div className="hidden md:block w-full md:w-1/3 lg:w-1/4 sticky top-44 lg:top-[190px] h-[calc(100vh-12rem)] min-h-[450px]">
+              <NewsSidebar />
             </div>
 
           </div>

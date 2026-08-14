@@ -69,6 +69,28 @@ export default function NewsSidebar() {
   const [showAllMobile, setShowAllMobile] = useState(false);
   const [newsItems, setNewsItems] = useState<NewsItem[]>(DEFAULT_NEWS);
 
+  const handleNewsWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    const scrollableDiv = e.currentTarget.querySelector('.overflow-y-auto') as HTMLDivElement | null;
+    if (!scrollableDiv) return;
+
+    if (!scrollableDiv.contains(e.target as Node)) {
+      scrollableDiv.scrollTop += e.deltaY;
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+
+    const { scrollTop, scrollHeight, clientHeight } = scrollableDiv;
+    const delta = e.deltaY;
+    const isAtTop = scrollTop <= 0 && delta < 0;
+    const isAtBottom = Math.ceil(scrollTop + clientHeight) >= scrollHeight && delta > 0;
+
+    if (isAtTop || isAtBottom) {
+      e.preventDefault();
+    }
+    e.stopPropagation();
+  };
+
   useEffect(() => {
     async function fetchNotices() {
       try {
@@ -142,12 +164,15 @@ export default function NewsSidebar() {
       </div>
 
       {/* Desktop Vertical Sidebar */}
-      <div className="hidden md:flex flex-col h-full rounded-lg shadow-sm bg-white overflow-hidden border border-gray-200">
-        <div className="bg-[#FF7F00] text-white px-4 py-3 shrink-0 flex justify-between items-center">
+      <div
+        onWheel={handleNewsWheel}
+        className="hidden md:flex flex-col h-full rounded-lg shadow-sm bg-white overflow-hidden border border-gray-200 overscroll-contain"
+      >
+        <div className="bg-[#FF7F00] text-white px-4 py-3 shrink-0 flex justify-between items-center select-none">
           <h3 className="font-lexend font-semibold text-base xl:text-lg m-0 whitespace-nowrap tracking-tight truncate">News & Announcements</h3>
           <span className="text-xs font-inter bg-white/20 px-2 py-0.5 rounded-full">{newsItems.length}</span>
         </div>
-        <div className="overflow-y-auto flex-1 p-3 space-y-4 custom-scrollbar">
+        <div className="overflow-y-auto flex-1 p-3 space-y-4 custom-scrollbar overscroll-contain">
           {newsItems.map((item) => (
             <a
               key={item.id}
