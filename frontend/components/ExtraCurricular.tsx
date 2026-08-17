@@ -14,6 +14,8 @@ const flagship = [
     blurb: "Asia's largest techno-management festival, run entirely by students — competitions, exhibitions and guest lectures.",
     icon: "fas fa-microchip",
     image: "/fests/kshitij.jpeg",
+    dates: "15–17 JAN 2027",
+    tentative: true,
   },
   {
     title: "Spring Fest",
@@ -21,6 +23,8 @@ const flagship = [
     blurb: "The annual social and cultural festival, drawing performers and competitors from across the country.",
     icon: "fas fa-star",
     image: "/fests/spring-fest.jpeg",
+    dates: "22–24 JAN 2027 ",
+    tentative: true,
   },
   {
     title: "Shaurya",
@@ -28,6 +32,8 @@ const flagship = [
     blurb: "The annual sports festival bringing together top athletic talent across colleges.",
     icon: "fas fa-trophy",
     image: "/fests/shaurya.jpeg",
+    dates: "09–11 OCT 2026",
+    tentative: true,
   },
   {
     title: "Wellbeing Day",
@@ -35,6 +41,8 @@ const flagship = [
     blurb: "A campus-wide festival promoting student health, mindfulness, and holistic well-being.",
     icon: "fas fa-heart-pulse",
     image: "/fests/wellbeing-day.jpeg",
+    dates: "To be declared",
+    tentative: false,
   },
 ];
 
@@ -158,11 +166,17 @@ export default function ExtraCurricular() {
                         {f.blurb}
                       </p>
                     </div>
-                    <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-inter font-medium text-gray-500 bg-gray-50 px-2.5 py-1 rounded-full border border-gray-200/60">
+                    <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between flex-wrap gap-2">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-inter font-medium text-gray-600 bg-gray-50 px-2.5 py-1 rounded-full border border-gray-200/60">
                         <i className="fas fa-calendar text-[11px] text-[#FF7F00]"></i>
-                        Dates to be announced
+                        {f.dates}
                       </span>
+                      {f.tentative && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-inter font-semibold uppercase tracking-wider text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                          <i className="fas fa-clock-rotate-left text-[9px]"></i>
+                          Tentative
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>

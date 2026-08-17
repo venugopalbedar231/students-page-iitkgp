@@ -61,7 +61,7 @@ export default function AdminPage() {
   const [adminEmail, setAdminEmail] = useState<string>('');
 
   // Login Form State
-  const [emailInput, setEmailInput] = useState<string>('parammhta444@gmail.com');
+  const [emailInput, setEmailInput] = useState<string>('');
   const [passwordInput, setPasswordInput] = useState<string>('');
   const [authLoading, setAuthLoading] = useState<boolean>(false);
   const [authError, setAuthError] = useState<string | null>(null);

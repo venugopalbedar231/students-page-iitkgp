@@ -8,7 +8,7 @@ import AcademicSections, {
   LinkItem,
   ApiResource,
 } from "@/components/AcademicSections";
-import { getApiUrl } from "@/lib/api";
+import { getApiUrl, getServerApiUrl } from "@/lib/api";
 import UGGuidelines from "@/components/UGGuidelines";
 import PwdInclusivity from "@/components/PwdInclusivity";
 import AlumniServices from "@/components/AlumniServices";
@@ -39,7 +39,7 @@ async function fetchAcademicResources(): Promise<ApiResource[]> {
   }
 
   try {
-    const res = await fetch(`${apiUrl}/academic`, { cache: "no-store" });
+    const res = await fetch(`${getServerApiUrl()}/academic`, { cache: "no-store" });
     if (!res.ok) {
       console.error(`[AcademicResources] API error (status: ${res.status})`);
       return [];
