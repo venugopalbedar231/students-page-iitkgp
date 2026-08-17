@@ -23,7 +23,7 @@ const flagship = [
     blurb: "The annual social and cultural festival, drawing performers and competitors from across the country.",
     icon: "fas fa-star",
     image: "/fests/spring-fest.jpeg",
-    dates: "22–24 JAN 2027",
+    dates: "22–24 JAN 2027 ",
     tentative: true,
   },
   {
