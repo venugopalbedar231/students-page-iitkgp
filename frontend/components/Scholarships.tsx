@@ -1,5 +1,7 @@
 "use client";
 import React, { useState } from 'react';
+import { useSearch, normalizeStr, textMatches } from "@/context/SearchContext";
+
 
 const OFFICIAL_URL = "https://www.iitkgp.ac.in/scholarships";
 
@@ -116,6 +118,21 @@ const related = [
 
 export default function Scholarships() {
   const [isOpen, setIsOpen] = useState(false);
+  const { query } = useSearch();
+  const q = query.trim().toLowerCase();
+  const qn = normalizeStr(q);
+  const match = (text: string) => textMatches(text, q, qn);
+
+  const sectionKeywords = ["scholarship", "mcm", "merit", "tuition", "fee", "stipend", "endowment",
+    "alumni", "assistantship", "pmrf", "fellowship", "award", "medal", "prize", "financial"];
+  const sectionVisible = qn === "" ||
+    sectionKeywords.some(k => match(k)) ||
+    schemes.some(s => match(s.name) || match(s.summary) || s.points.some(p => match(p))) ||
+    criteria.some(c => match(c.title) || c.items.some(i => match(i))) ||
+    goodToKnow.some(g => match(g.text)) ||
+    related.some(r => match(r.title) || match(r.desc));
+
+  if (!sectionVisible) return null;
 
   return (
     <div id="scholarships" className="mb-6 md:mb-8 rounded-lg shadow-sm border border-gray-200 bg-white overflow-hidden scroll-mt-24">

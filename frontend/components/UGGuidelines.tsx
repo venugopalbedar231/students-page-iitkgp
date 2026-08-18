@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from 'react';
+import { useSearch, normalizeStr, textMatches } from "@/context/SearchContext";
 
 /**
  * Every fact below is sourced from the two PDFs served out of /public/docs:
@@ -137,6 +138,27 @@ function DocCard({ doc }: { doc: Doc }) {
 
 export default function UGGuidelines() {
   const [isOpen, setIsOpen] = useState(false);
+  const { query } = useSearch();
+  const q = query.trim().toLowerCase();
+  const qn = normalizeStr(q);
+  const match = (text: string) => textMatches(text, q, qn);
+
+  // Filter tracks whose title, chip, blurb, or any bullet point matches
+  const visibleTracks = qn === ""
+    ? tracks
+    : tracks.filter(t =>
+        match(t.title) || match(t.chip) || match(t.blurb) || t.points.some(p => match(p))
+      );
+
+  // Hide the entire section if query is active and nothing matches
+  const sectionKeywords = ["ug", "undergraduate", "guidelines", "dual degree", "minor", "double major",
+    "micro specialization", "semester away", "semester exchange", "curriculum"];
+  const sectionVisible = qn === "" || visibleTracks.length > 0 ||
+    sectionKeywords.some(k => match(k)) ||
+    changes.some(c => match(c)) ||
+    docs.some(d => match(d.title) || match(d.desc));
+
+  if (!sectionVisible) return null;
 
   return (
     <div id="ug-guidelines" className="mb-6 md:mb-8 rounded-lg shadow-sm border border-gray-200 bg-white overflow-hidden scroll-mt-24">

@@ -1,5 +1,7 @@
 "use client";
 import React, { useState } from 'react';
+import { useSearch, normalizeStr, textMatches } from "@/context/SearchContext";
+
 
 const PORTAL_URL = "https://erp.iitkgp.ac.in/DupCertReqPortal/auth/welcome.htm";
 const ERP_URL = "https://erp.iitkgp.ac.in";
@@ -57,6 +59,19 @@ const steps = [
 
 export default function AlumniServices() {
   const [isOpen, setIsOpen] = useState(false);
+  const { query } = useSearch();
+  const q = query.trim().toLowerCase();
+  const qn = normalizeStr(q);
+  const match = (text: string) => textMatches(text, q, qn);
+
+  const sectionKeywords = ["alumni", "transcript", "certificate", "degree", "verification",
+    "duplicate", "erp", "portal", "dispatch", "convocation"];
+  const sectionVisible = qn === "" ||
+    sectionKeywords.some(k => match(k)) ||
+    services.some(s => match(s.title) || match(s.desc)) ||
+    steps.some(s => match(s.title) || match(s.desc));
+
+  if (!sectionVisible) return null;
 
   return (
     <div

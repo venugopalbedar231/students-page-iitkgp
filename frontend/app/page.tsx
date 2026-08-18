@@ -17,6 +17,8 @@ import EmergencyContacts from "@/components/EmergencyContacts";
 import ExtraCurricular from "@/components/ExtraCurricular";
 import CampusMap from "@/components/CampusMap";
 import HeroVideo from "@/components/HeroVideo";
+import { SearchProvider } from "@/context/SearchContext";
+import GlobalSearchBar from "@/components/GlobalSearchBar";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -125,27 +127,30 @@ export default async function Home() {
           <div className="flex flex-col md:flex-row gap-6 lg:gap-8 items-start">
             
             {/* Left Content Area (Resources + Map) */}
-            <div className="w-full md:w-2/3 lg:w-3/4 flex flex-col">
-              <AcademicSections
-                initialUg={ugLinks}
-                initialPg={pgLinks}
-                initialPhd={phdLinks}
-              />
+            <SearchProvider>
+              <div className="w-full md:w-2/3 lg:w-3/4 flex flex-col">
+                <GlobalSearchBar />
+                <AcademicSections
+                  initialUg={ugLinks}
+                  initialPg={pgLinks}
+                  initialPhd={phdLinks}
+                />
 
-              <PwdInclusivity />
+                <PwdInclusivity />
 
-              <UGGuidelines />
+                <UGGuidelines />
 
-              <AlumniServices />
+                <AlumniServices />
 
-              <Scholarships />
+                <Scholarships />
 
-              <ExtraCurricular />
+                <ExtraCurricular />
 
-              <EmergencyContacts />
+                <EmergencyContacts />
 
-              <CampusMap />
-            </div>
+                <CampusMap />
+              </div>
+            </SearchProvider>
 
             {/* Right Sidebar Area (News) */}
             <div className="hidden md:block w-full md:w-1/3 lg:w-1/4 sticky top-44 lg:top-[190px] h-[calc(100vh-12rem)] min-h-[450px]">

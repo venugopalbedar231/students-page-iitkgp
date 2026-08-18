@@ -1,5 +1,6 @@
 "use client";
 import React from 'react';
+import { useSearch, normalizeStr, textMatches } from "@/context/SearchContext";
 
 /**
  * Deliberately a glance layer, not a directory — the Gymkhana site is the authority on
@@ -65,6 +66,18 @@ const eaaStreams = ["NCC", "NSS", "NSO", "Health & Fitness", "Indian Classical M
 
 export default function ExtraCurricular() {
   const [isOpen, setIsOpen] = React.useState(false);
+  const { query } = useSearch();
+  const q = query.trim().toLowerCase();
+  const qn = normalizeStr(q);
+  const match = (text: string) => textMatches(text, q, qn);
+
+  const sectionKeywords = ["extra curricular", "extracurricular", "fest", "kshitij", "spring fest",
+    "shaurya", "wellbeing", "sports", "society", "gymkhana", "nso", "eaa", "cultural", "techno", "campus life"];
+  const sectionVisible = qn === "" ||
+    sectionKeywords.some(k => match(k)) ||
+    flagship.some(f => match(f.title) || match(f.blurb) || match(f.kicker));
+
+  if (!sectionVisible) return null;
 
   return (
     <div id="extra-curricular" className="mb-6 md:mb-8 rounded-lg shadow-sm border border-gray-200 bg-white overflow-hidden scroll-mt-24">

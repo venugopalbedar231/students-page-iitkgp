@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import ResourceCategory from "./ResourceCategory";
 import { getApiUrl } from "@/lib/api";
+import { useSearch, normalizeStr, textMatches } from "@/context/SearchContext";
 
 export type LinkItem = {
   title: string;
@@ -72,29 +73,23 @@ export default function AcademicSections({
   const [ugLinks, setUgLinks] = useState<LinkItem[]>(initialUg);
   const [pgLinks, setPgLinks] = useState<LinkItem[]>(initialPg);
   const [phdLinks, setPhdLinks] = useState<LinkItem[]>(initialPhd);
-  const [query, setQuery] = useState<string>("");
 
-  // Strip dots, spaces, hyphens for fuzzy matching (e.g. "mtech" == "m.tech" == "m tech")
-  const normalize = (s: string) => s.toLowerCase().replace(/[\s.\-]/g, "");
-
+  // Use global search query from context
+  const { query } = useSearch();
   const q = query.trim().toLowerCase();
-  const qn = normalize(q); // normalized query
+  const qn = normalizeStr(q);
 
-  const matchText = (text: string) =>
-    text.toLowerCase().includes(q) || normalize(text).includes(qn);
+  const matchText = (text: string) => textMatches(text, q, qn);
 
   const filterLinks = (links: LinkItem[]) =>
     qn === ""
       ? links
-      : links.filter(
-          (l) => matchText(l.title) || matchText(l.desc ?? "")
-        );
+      : links.filter((l) => matchText(l.title) || matchText(l.desc ?? ""));
 
   const filteredUg = filterLinks(ugLinks);
   const filteredPg = filterLinks(pgLinks);
   const filteredPhd = filterLinks(phdLinks);
 
-  // A section is visible if it has matching links OR its title matches
   const ugVisible = qn === "" || filteredUg.length > 0 || matchText("undergraduate") || matchText("ug");
   const pgVisible = qn === "" || filteredPg.length > 0 || matchText("postgraduate") || matchText("pg");
   const phdVisible = qn === "" || filteredPhd.length > 0 || matchText("research scholars") || matchText("phd") || matchText("rs");
@@ -167,33 +162,6 @@ export default function AcademicSections({
 
   return (
     <>
-      {/* Search bar */}
-      <div className="mb-4 flex items-center gap-2">
-        <div className="relative flex-1">
-          <i className="fas fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none"></i>
-          <input
-            id="academic-search"
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search resources (e.g. curriculum, thesis, ERP…)"
-            className="w-full pl-9 pr-4 py-2.5 text-sm font-inter rounded-lg border border-gray-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF7F00]/40 focus:border-[#FF7F00] placeholder:text-gray-400 transition"
-          />
-        </div>
-        {query && (
-          <button
-            onClick={() => setQuery("")}
-            className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg border border-gray-200 bg-white text-sm font-inter font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 shadow-sm transition"
-          >
-            <i className="fas fa-xmark text-xs"></i>
-            Cancel
-          </button>
-        )}
-      </div>
-
-
-
-
       {ugVisible && <ResourceCategory title="Undergraduate (UG)" links={q ? filteredUg : ugLinks} defaultOpen={true} />}
       {pgVisible && <ResourceCategory title="Postgraduate (PG)" links={q ? filteredPg : pgLinks} defaultOpen={q !== ""} />}
       {phdVisible && <ResourceCategory title="Research Scholars" links={q ? filteredPhd : phdLinks} defaultOpen={q !== ""} />}

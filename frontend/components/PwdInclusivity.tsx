@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from 'react';
+import { useSearch, normalizeStr, textMatches } from "@/context/SearchContext";
 
 const OFFICIAL_URL = "https://www.iitkgp.ac.in/inclusivity";
 const DISABILITY_DOC = "https://www.iitkgp.ac.in/assets/sdsi/Brief-write-up-on-disabilty-inclusiveness.pdf";
@@ -46,6 +47,18 @@ const features = [
 
 export default function PwdInclusivity() {
   const [isOpen, setIsOpen] = useState(false);
+  const { query } = useSearch();
+  const q = query.trim().toLowerCase();
+  const qn = normalizeStr(q);
+  const match = (text: string) => textMatches(text, q, qn);
+
+  const sectionKeywords = ["pwd", "disability", "inclusivity", "wheelchair", "accessibility",
+    "barrier free", "assistive", "scribe", "accommodation", "welfare", "pic", "cell"];
+  const sectionVisible = qn === "" ||
+    sectionKeywords.some(k => match(k)) ||
+    features.some(f => match(f.title) || match(f.desc));
+
+  if (!sectionVisible) return null;
 
   return (
     <div

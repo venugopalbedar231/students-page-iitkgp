@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from 'react';
+import { useSearch, normalizeStr, textMatches } from "@/context/SearchContext";
 
 /**
  * Numbers are transcribed from the Institute's "Important Telephone Numbers" sheet.
@@ -53,12 +54,6 @@ const offices: Office[] = [
     name: "Drashti Gala",
     role: "Gen. Secretary, Students' Welfare",
     numbers: ["+91 96196 13642"],
-    note: "TSG students' welfare",
-  },
-  {
-    name: "Kshitij Reddy",
-    role: "Gen. Secretary, Students' Welfare",
-    numbers: ["+91 63052 64348"],
     note: "TSG students' welfare",
   },
   {
@@ -209,8 +204,8 @@ function NumberLinks({ numbers, tone = "brand" }: { numbers: string[]; tone?: "b
           <a
             href={telHref(n)}
             className={`font-inter font-semibold text-[13px] tabular-nums no-underline transition-colors ${tone === "danger"
-                ? "text-red-700 hover:text-red-900"
-                : "text-gray-800 hover:text-[#FF7F00]"
+              ? "text-red-700 hover:text-red-900"
+              : "text-gray-800 hover:text-[#FF7F00]"
               }`}
           >
             {n}
@@ -247,6 +242,20 @@ function DirectoryGroup({ group }: { group: Group }) {
 
 export default function EmergencyContacts() {
   const [isOpen, setIsOpen] = useState(false);
+  const { query } = useSearch();
+  const q = query.trim().toLowerCase();
+  const qn = normalizeStr(q);
+  const match = (text: string) => textMatches(text, q, qn);
+
+  const sectionKeywords = ["emergency", "contact", "security", "hospital", "police", "qrt",
+    "fire", "ambulance", "helpline", "welfare", "dean", "tsg", "phone", "number", "call"];
+  const sectionVisible = qn === "" ||
+    sectionKeywords.some(k => match(k)) ||
+    emergency.some(c => match(c.label) || match(c.note ?? "")) ||
+    offices.some(o => match(o.role) || match(o.name ?? "") || match(o.note ?? "")) ||
+    securityContacts.some(c => match(c.label) || match(c.description ?? ""));
+
+  if (!sectionVisible) return null;
 
   return (
     <div id="contacts" className="mb-6 md:mb-8 rounded-lg shadow-sm border border-gray-200 bg-white overflow-hidden scroll-mt-24">
