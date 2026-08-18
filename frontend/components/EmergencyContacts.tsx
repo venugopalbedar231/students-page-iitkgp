@@ -354,6 +354,9 @@ export default function EmergencyContacts() {
                     )}
 
                     <div className="flex flex-col mb-1.5">
+                      {o.name === "Sangekar Rajas Madhav" && o.note && (
+                        <span className="text-[11px] text-gray-500 font-inter leading-snug mb-1">{o.note}</span>
+                      )}
                       {o.numbers.map((n) => (
                         <a
                           key={n}
@@ -365,7 +368,6 @@ export default function EmergencyContacts() {
                       ))}
                     </div>
 
-                    {o.note && <span className="text-[11px] text-gray-500 font-inter leading-snug">{o.note}</span>}
                     {o.email && (
                       <span className="text-[11px] text-gray-500 font-inter leading-snug mt-1 break-all">{o.email}</span>
                     )}
