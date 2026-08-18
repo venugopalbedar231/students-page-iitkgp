@@ -44,8 +44,21 @@ const offices: Office[] = [
     note: "Technology Students' Gymkhana",
   },
   {
+    name: "Aayan Nawaz",
     role: "Gen. Secretary, Students' Welfare",
-    numbers: ["+91 93410 35378", "+91 63052 64348", "+91 96196 13642"],
+    numbers: ["+91 93410 35378"],
+    note: "TSG students' welfare",
+  },
+  {
+    name: "Drashti Gala",
+    role: "Gen. Secretary, Students' Welfare",
+    numbers: ["+91 96196 13642"],
+    note: "TSG students' welfare",
+  },
+  {
+    name: "Kshitij Reddy",
+    role: "Gen. Secretary, Students' Welfare",
+    numbers: ["+91 63052 64348"],
     note: "TSG students' welfare",
   },
   {
